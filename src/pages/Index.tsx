@@ -109,7 +109,7 @@ const Index = () => {
         />
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-6">
         {posts.map((post) => (
           <Post
             key={post.id}
