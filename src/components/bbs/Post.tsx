@@ -74,7 +74,7 @@ export const Post = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="bbs-card fade-in">
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0">
@@ -167,7 +167,7 @@ export const Post = ({
       </div>
 
       {post.replies && post.replies.length > 0 && (
-        <div className="pl-8 space-y-4 border-l-2 border-primary/20">
+        <div className="pl-8 space-y-2">
           {post.replies.map((reply) => (
             <Reply key={reply.id} reply={reply} />
           ))}
