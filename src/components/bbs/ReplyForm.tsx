@@ -6,9 +6,10 @@ interface ReplyFormProps {
   replyContent: string;
   setReplyContent: (value: string) => void;
   handleReply: () => void;
+  onCancel: () => void;
 }
 
-export const ReplyForm = ({ replyContent, setReplyContent, handleReply }: ReplyFormProps) => {
+export const ReplyForm = ({ replyContent, setReplyContent, handleReply, onCancel }: ReplyFormProps) => {
   return (
     <div className="mt-4 space-y-2">
       <Textarea
@@ -17,9 +18,14 @@ export const ReplyForm = ({ replyContent, setReplyContent, handleReply }: ReplyF
         onChange={(e) => setReplyContent(e.target.value)}
         className="bbs-input w-full"
       />
-      <Button onClick={handleReply} className="bbs-button">
-        Reply
-      </Button>
+      <div className="flex gap-2">
+        <Button onClick={handleReply} className="bbs-button">
+          Reply
+        </Button>
+        <Button onClick={onCancel} variant="outline">
+          Cancel
+        </Button>
+      </div>
     </div>
   );
 };

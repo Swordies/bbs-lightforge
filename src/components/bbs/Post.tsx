@@ -87,41 +87,44 @@ export const Post = ({
             <p className="mb-4">{post.content}</p>
           )}
 
-          <div className="flex items-center gap-2">
-            {user && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setReplyingTo(post.id)}
-              >
-                <ReplyIcon className="w-4 h-4 mr-1" /> Reply
-              </Button>
-            )}
-            {user && user.username === post.author && editingPost !== post.id && (
-              <>
+          {!editingPost && (
+            <div className="flex items-center gap-2">
+              {user && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleEdit(post.id)}
+                  onClick={() => setReplyingTo(post.id)}
                 >
-                  <Edit2 className="w-4 h-4 mr-1" /> Edit
+                  <ReplyIcon className="w-4 h-4 mr-1" /> Reply
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDelete(post.id)}
-                >
-                  <Trash2 className="w-4 h-4 mr-1" /> Delete
-                </Button>
-              </>
-            )}
-          </div>
+              )}
+              {user && user.username === post.author && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEdit(post.id)}
+                  >
+                    <Edit2 className="w-4 h-4 mr-1" /> Edit
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(post.id)}
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" /> Delete
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
 
-          {replyingTo === post.id && (
+          {replyingTo === post.id && !editingPost && (
             <ReplyForm
               replyContent={replyContent}
               setReplyContent={setReplyContent}
               handleReply={() => handleReply(post.id)}
+              onCancel={() => setReplyingTo(null)}
             />
           )}
 
