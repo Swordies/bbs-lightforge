@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare, Edit2, Trash2, Reply as ReplyIcon } from "lucide-react";
 import { Reply } from "./Reply";
 import { ReplyForm } from "./ReplyForm";
+import { useState } from "react";
 
 interface PostProps {
   post: {
@@ -49,6 +50,17 @@ export const Post = ({
   handleSaveEdit,
   handleReply,
 }: PostProps) => {
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  const handleDeleteClick = (postId: string) => {
+    if (deleteConfirmId === postId) {
+      handleDelete(postId);
+      setDeleteConfirmId(null);
+    } else {
+      setDeleteConfirmId(postId);
+    }
+  };
+
   return (
     <div className="bbs-card fade-in">
       <div className="flex items-start gap-4">
@@ -108,11 +120,12 @@ export const Post = ({
                     <Edit2 className="w-4 h-4 mr-1" /> Edit
                   </Button>
                   <Button
-                    variant="ghost"
+                    variant={deleteConfirmId === post.id ? "destructive" : "ghost"}
                     size="sm"
-                    onClick={() => handleDelete(post.id)}
+                    onClick={() => handleDeleteClick(post.id)}
                   >
-                    <Trash2 className="w-4 h-4 mr-1" /> Delete
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    {deleteConfirmId === post.id ? "Click to confirm" : "Delete"}
                   </Button>
                 </>
               )}
