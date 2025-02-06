@@ -1,4 +1,5 @@
 
+import { memo } from "react";
 import { Post } from "./Post";
 
 interface PostListProps {
@@ -30,7 +31,7 @@ interface PostListProps {
   handleReply: (id: string) => void;
 }
 
-export const PostList = ({
+export const PostList = memo(({
   posts,
   user,
   editingPost,
@@ -67,4 +68,6 @@ export const PostList = ({
       ))}
     </div>
   );
-};
+});
+
+PostList.displayName = "PostList";
