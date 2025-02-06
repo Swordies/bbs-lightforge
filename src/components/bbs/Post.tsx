@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare, Edit2, Trash2, Reply as ReplyIcon } from "lucide-react";
 import { Reply } from "./Reply";
 import { ReplyForm } from "./ReplyForm";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface PostProps {
   post: {
@@ -52,7 +52,19 @@ export const Post = ({
 }: PostProps) => {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const handleDeleteClick = (postId: string) => {
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (deleteConfirmId) {
+        setDeleteConfirmId(null);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [deleteConfirmId]);
+
+  const handleDeleteClick = (postId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent the click from bubbling up to the document
     if (deleteConfirmId === postId) {
       handleDelete(postId);
       setDeleteConfirmId(null);
@@ -122,10 +134,9 @@ export const Post = ({
                   <Button
                     variant={deleteConfirmId === post.id ? "destructive" : "ghost"}
                     size="sm"
-                    onClick={() => handleDeleteClick(post.id)}
+                    onClick={(e) => handleDeleteClick(post.id, e)}
                   >
-                    <Trash2 className="w-4 h-4 mr-1" />
-                    {deleteConfirmId === post.id ? "Click to confirm" : "Delete"}
+                    <Trash2 className="w-4 h-4 mr-1" /> Delete
                   </Button>
                 </>
               )}
