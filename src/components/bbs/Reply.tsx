@@ -19,10 +19,10 @@ export const Reply = ({ reply }: ReplyProps) => {
           <img
             src={reply.authorIcon}
             alt={reply.author}
-            className="w-8 h-8 rounded-full"
+            className="w-[100px] h-[100px] rounded-full object-cover"
           />
         ) : (
-          <MessageSquare className="w-8 h-8" />
+          <MessageSquare className="w-[100px] h-[100px]" />
         )}
         <div>
           <div className="flex items-center gap-2 mb-1">

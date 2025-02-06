@@ -56,10 +56,10 @@ export const Post = ({
           <img
             src={post.authorIcon}
             alt={post.author}
-            className="w-10 h-10 rounded-full"
+            className="w-[100px] h-[100px] rounded-full object-cover"
           />
         ) : (
-          <MessageSquare className="w-10 h-10" />
+          <MessageSquare className="w-[100px] h-[100px]" />
         )}
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
