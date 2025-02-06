@@ -64,7 +64,7 @@ export const Post = ({
   }, [deleteConfirmId]);
 
   const handleDeleteClick = (postId: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent the click from bubbling up to the document
+    e.stopPropagation();
     if (deleteConfirmId === postId) {
       handleDelete(postId);
       setDeleteConfirmId(null);
@@ -74,22 +74,24 @@ export const Post = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8">
       <div className="bbs-card fade-in">
         <div className="flex items-start gap-4">
-          {post.authorIcon ? (
-            <img
-              src={post.authorIcon}
-              alt={post.author}
-              className="w-[100px] h-[100px] rounded-full object-cover"
-            />
-          ) : (
-            <MessageSquare className="w-[100px] h-[100px]" />
-          )}
           <div className="flex-1">
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-bold">{post.author}</span>
-              <span className="text-sm text-muted-foreground">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                {post.authorIcon ? (
+                  <img
+                    src={post.authorIcon}
+                    alt={post.author}
+                    className="w-12 h-12 rounded-none border border-primary/50 object-cover"
+                  />
+                ) : (
+                  <MessageSquare className="w-12 h-12" />
+                )}
+                <span className="font-bold px-2 py-1 border border-primary/50">{post.author}</span>
+              </div>
+              <span className="text-sm text-muted-foreground border border-primary/20 px-2">
                 {post.createdAt.toLocaleString()}
               </span>
             </div>
@@ -99,7 +101,7 @@ export const Post = ({
                 <Textarea
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
-                  className="bbs-input w-full"
+                  className="bbs-input w-full min-h-[100px]"
                 />
                 <Button
                   onClick={() => handleSaveEdit(post.id)}
@@ -109,16 +111,19 @@ export const Post = ({
                 </Button>
               </div>
             ) : (
-              <p className="mb-4">{post.content}</p>
+              <div className="mb-4 px-4 py-2 border border-primary/20">
+                {post.content}
+              </div>
             )}
 
             {!editingPost && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mt-4">
                 {user && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setReplyingTo(post.id)}
+                    className="bbs-button"
                   >
                     <ReplyIcon className="w-4 h-4 mr-1" /> Reply
                   </Button>
@@ -129,6 +134,7 @@ export const Post = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => handleEdit(post.id)}
+                      className="bbs-button"
                     >
                       <Edit2 className="w-4 h-4 mr-1" /> Edit
                     </Button>
@@ -136,6 +142,7 @@ export const Post = ({
                       variant={deleteConfirmId === post.id ? "destructive" : "ghost"}
                       size="sm"
                       onClick={(e) => handleDeleteClick(post.id, e)}
+                      className="bbs-button"
                     >
                       <Trash2 className="w-4 h-4 mr-1" /> Delete
                     </Button>
@@ -157,7 +164,7 @@ export const Post = ({
       </div>
 
       {post.replies && post.replies.length > 0 && (
-        <div className="pl-8 space-y-4">
+        <div className="pl-8 space-y-6 border-l-2 border-primary/20">
           {post.replies.map((reply) => (
             <Reply key={reply.id} reply={reply} />
           ))}

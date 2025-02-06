@@ -13,26 +13,32 @@ interface ReplyProps {
 
 export const Reply = ({ reply }: ReplyProps) => {
   return (
-    <div className="bbs-card p-4 fade-in">
-      <div className="flex items-start justify-between gap-4">
+    <div className="bbs-card fade-in">
+      <div className="flex items-start gap-4">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-bold">{reply.author}</span>
-            <span className="text-sm text-muted-foreground">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              {reply.authorIcon ? (
+                <img
+                  src={reply.authorIcon}
+                  alt={reply.author}
+                  className="w-10 h-10 rounded-none border border-primary/50 object-cover"
+                />
+              ) : (
+                <MessageSquare className="w-10 h-10" />
+              )}
+              <span className="font-bold px-2 py-1 border border-primary/50">
+                {reply.author}
+              </span>
+            </div>
+            <span className="text-sm text-muted-foreground border border-primary/20 px-2">
               {reply.createdAt.toLocaleString()}
             </span>
           </div>
-          <p className="mb-2">{reply.content}</p>
+          <div className="px-4 py-2 border border-primary/20">
+            {reply.content}
+          </div>
         </div>
-        {reply.authorIcon ? (
-          <img
-            src={reply.authorIcon}
-            alt={reply.author}
-            className="w-[100px] h-[100px] rounded-full object-cover"
-          />
-        ) : (
-          <MessageSquare className="w-[100px] h-[100px]" />
-        )}
       </div>
     </div>
   );
