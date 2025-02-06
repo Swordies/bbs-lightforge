@@ -48,7 +48,7 @@
 }
 
 .bbs-card {
-  @apply bg-secondary/50 backdrop-blur-sm border border-border/50 rounded-lg p-6 transition-all duration-300;
+  @apply border border-border/50 rounded-lg p-6 transition-all duration-300;
 }
 
 .bbs-input {

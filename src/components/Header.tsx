@@ -5,6 +5,7 @@ import { UserCircle, ImagePlus } from "lucide-react";
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { useToast } from "./ui/use-toast";
+import { Link } from "react-router-dom";
 
 export const Header = () => {
   const { user, logout, updateIcon } = useAuth();
@@ -35,7 +36,7 @@ export const Header = () => {
   return (
     <header className="border-b border-border/50 backdrop-blur-sm fixed top-0 left-0 right-0 z-50">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold">ASCII BBS</h1>
+        <Link to="/" className="text-xl font-bold hover:opacity-80 transition-opacity">ASCII BBS</Link>
         <div className="flex items-center gap-4">
           {user ? (
             <div className="flex items-center gap-4">
