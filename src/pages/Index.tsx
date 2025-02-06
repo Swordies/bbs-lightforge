@@ -100,7 +100,7 @@ const Index = () => {
   };
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto px-4">
+    <div className="space-y-4 max-w-5xl mx-auto px-2">
       {user && (
         <PostForm
           newPost={newPost}
@@ -109,7 +109,7 @@ const Index = () => {
         />
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-2">
         {posts.map((post) => (
           <Post
             key={post.id}
