@@ -1,11 +1,223 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { MessageSquare, Edit2, Trash2, Reply } from "lucide-react";
+
+interface Post {
+  id: string;
+  content: string;
+  author: string;
+  authorIcon?: string;
+  createdAt: Date;
+  replies?: Post[];
+}
 
 const Index = () => {
+  const { user } = useAuth();
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [newPost, setNewPost] = useState("");
+  const [editingPost, setEditingPost] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState("");
+
+  const handlePost = () => {
+    if (!user || !newPost.trim()) return;
+
+    const post: Post = {
+      id: Date.now().toString(),
+      content: newPost,
+      author: user.username,
+      authorIcon: user.iconUrl,
+      createdAt: new Date(),
+      replies: [],
+    };
+
+    setPosts([post, ...posts]);
+    setNewPost("");
+  };
+
+  const handleEdit = (postId: string) => {
+    const post = posts.find((p) => p.id === postId);
+    if (post) {
+      setEditingPost(postId);
+      setEditContent(post.content);
+    }
+  };
+
+  const handleSaveEdit = (postId: string) => {
+    setPosts(
+      posts.map((post) =>
+        post.id === postId ? { ...post, content: editContent } : post
+      )
+    );
+    setEditingPost(null);
+    setEditContent("");
+  };
+
+  const handleDelete = (postId: string) => {
+    setPosts(posts.filter((post) => post.id !== postId));
+  };
+
+  const handleReply = (postId: string) => {
+    if (!user || !replyContent.trim()) return;
+
+    const reply: Post = {
+      id: Date.now().toString(),
+      content: replyContent,
+      author: user.username,
+      authorIcon: user.iconUrl,
+      createdAt: new Date(),
+    };
+
+    setPosts(
+      posts.map((post) =>
+        post.id === postId
+          ? { ...post, replies: [...(post.replies || []), reply] }
+          : post
+      )
+    );
+    setReplyingTo(null);
+    setReplyContent("");
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="space-y-8 max-w-3xl mx-auto">
+      {user && (
+        <div className="bbs-card fade-in">
+          <Textarea
+            placeholder="What's on your mind?"
+            value={newPost}
+            onChange={(e) => setNewPost(e.target.value)}
+            className="bbs-input w-full mb-4"
+          />
+          <Button onClick={handlePost} className="bbs-button">
+            Post
+          </Button>
+        </div>
+      )}
+
+      <div className="space-y-4">
+        {posts.map((post) => (
+          <div key={post.id} className="bbs-card fade-in">
+            <div className="flex items-start gap-4">
+              {post.authorIcon ? (
+                <img
+                  src={post.authorIcon}
+                  alt={post.author}
+                  className="w-10 h-10 rounded-full"
+                />
+              ) : (
+                <MessageSquare className="w-10 h-10" />
+              )}
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-bold">{post.author}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {post.createdAt.toLocaleString()}
+                  </span>
+                </div>
+
+                {editingPost === post.id ? (
+                  <div className="space-y-2">
+                    <Textarea
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      className="bbs-input w-full"
+                    />
+                    <Button
+                      onClick={() => handleSaveEdit(post.id)}
+                      className="bbs-button"
+                    >
+                      Save
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="mb-4">{post.content}</p>
+                )}
+
+                {user && user.username === post.author && editingPost !== post.id && (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(post.id)}
+                    >
+                      <Edit2 className="w-4 h-4 mr-1" /> Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(post.id)}
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" /> Delete
+                    </Button>
+                  </div>
+                )}
+
+                {user && (
+                  <div className="mt-4">
+                    {replyingTo === post.id ? (
+                      <div className="space-y-2">
+                        <Textarea
+                          placeholder="Write a reply..."
+                          value={replyContent}
+                          onChange={(e) => setReplyContent(e.target.value)}
+                          className="bbs-input w-full"
+                        />
+                        <Button
+                          onClick={() => handleReply(post.id)}
+                          className="bbs-button"
+                        >
+                          Reply
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setReplyingTo(post.id)}
+                      >
+                        <Reply className="w-4 h-4 mr-1" /> Reply
+                      </Button>
+                    )}
+                  </div>
+                )}
+
+                {post.replies && post.replies.length > 0 && (
+                  <div className="mt-4 space-y-4 pl-4 border-l border-border">
+                    {post.replies.map((reply) => (
+                      <div key={reply.id} className="fade-in">
+                        <div className="flex items-start gap-4">
+                          {reply.authorIcon ? (
+                            <img
+                              src={reply.authorIcon}
+                              alt={reply.author}
+                              className="w-8 h-8 rounded-full"
+                            />
+                          ) : (
+                            <MessageSquare className="w-8 h-8" />
+                          )}
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-bold">{reply.author}</span>
+                              <span className="text-sm text-muted-foreground">
+                                {reply.createdAt.toLocaleString()}
+                              </span>
+                            </div>
+                            <p>{reply.content}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
