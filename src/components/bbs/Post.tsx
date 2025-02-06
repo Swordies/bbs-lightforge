@@ -74,93 +74,95 @@ export const Post = ({
   };
 
   return (
-    <div className="bbs-card fade-in">
-      <div className="flex items-start gap-4">
-        {post.authorIcon ? (
-          <img
-            src={post.authorIcon}
-            alt={post.author}
-            className="w-[100px] h-[100px] rounded-full object-cover"
-          />
-        ) : (
-          <MessageSquare className="w-[100px] h-[100px]" />
-        )}
-        <div className="flex-1">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-bold">{post.author}</span>
-            <span className="text-sm text-muted-foreground">
-              {post.createdAt.toLocaleString()}
-            </span>
-          </div>
-
-          {editingPost === post.id ? (
-            <div className="space-y-2">
-              <Textarea
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                className="bbs-input w-full"
-              />
-              <Button
-                onClick={() => handleSaveEdit(post.id)}
-                className="bbs-button"
-              >
-                Save
-              </Button>
-            </div>
+    <div className="space-y-4">
+      <div className="bbs-card fade-in">
+        <div className="flex items-start gap-4">
+          {post.authorIcon ? (
+            <img
+              src={post.authorIcon}
+              alt={post.author}
+              className="w-[100px] h-[100px] rounded-full object-cover"
+            />
           ) : (
-            <p className="mb-4">{post.content}</p>
+            <MessageSquare className="w-[100px] h-[100px]" />
           )}
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-bold">{post.author}</span>
+              <span className="text-sm text-muted-foreground">
+                {post.createdAt.toLocaleString()}
+              </span>
+            </div>
 
-          {!editingPost && (
-            <div className="flex items-center gap-2">
-              {user && (
+            {editingPost === post.id ? (
+              <div className="space-y-2">
+                <Textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  className="bbs-input w-full"
+                />
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setReplyingTo(post.id)}
+                  onClick={() => handleSaveEdit(post.id)}
+                  className="bbs-button"
                 >
-                  <ReplyIcon className="w-4 h-4 mr-1" /> Reply
+                  Save
                 </Button>
-              )}
-              {user && user.username === post.author && (
-                <>
+              </div>
+            ) : (
+              <p className="mb-4">{post.content}</p>
+            )}
+
+            {!editingPost && (
+              <div className="flex items-center gap-2">
+                {user && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleEdit(post.id)}
+                    onClick={() => setReplyingTo(post.id)}
                   >
-                    <Edit2 className="w-4 h-4 mr-1" /> Edit
+                    <ReplyIcon className="w-4 h-4 mr-1" /> Reply
                   </Button>
-                  <Button
-                    variant={deleteConfirmId === post.id ? "destructive" : "ghost"}
-                    size="sm"
-                    onClick={(e) => handleDeleteClick(post.id, e)}
-                  >
-                    <Trash2 className="w-4 h-4 mr-1" /> Delete
-                  </Button>
-                </>
-              )}
-            </div>
-          )}
+                )}
+                {user && user.username === post.author && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(post.id)}
+                    >
+                      <Edit2 className="w-4 h-4 mr-1" /> Edit
+                    </Button>
+                    <Button
+                      variant={deleteConfirmId === post.id ? "destructive" : "ghost"}
+                      size="sm"
+                      onClick={(e) => handleDeleteClick(post.id, e)}
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" /> Delete
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
 
-          {replyingTo === post.id && !editingPost && (
-            <ReplyForm
-              replyContent={replyContent}
-              setReplyContent={setReplyContent}
-              handleReply={() => handleReply(post.id)}
-              onCancel={() => setReplyingTo(null)}
-            />
-          )}
-
-          {post.replies && post.replies.length > 0 && (
-            <div className="mt-4 space-y-4 pl-4 border-l border-border">
-              {post.replies.map((reply) => (
-                <Reply key={reply.id} reply={reply} />
-              ))}
-            </div>
-          )}
+            {replyingTo === post.id && !editingPost && (
+              <ReplyForm
+                replyContent={replyContent}
+                setReplyContent={setReplyContent}
+                handleReply={() => handleReply(post.id)}
+                onCancel={() => setReplyingTo(null)}
+              />
+            )}
+          </div>
         </div>
       </div>
+
+      {post.replies && post.replies.length > 0 && (
+        <div className="pl-8 space-y-4">
+          {post.replies.map((reply) => (
+            <Reply key={reply.id} reply={reply} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
