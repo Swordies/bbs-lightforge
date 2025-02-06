@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Post } from "@/components/bbs/Post";
+import { PostList } from "@/components/bbs/PostList";
 import { PostForm } from "@/components/bbs/PostForm";
 
 interface Post {
@@ -109,26 +109,21 @@ const Index = () => {
         />
       )}
 
-      <div className="space-y-6">
-        {posts.map((post) => (
-          <Post
-            key={post.id}
-            post={post}
-            user={user}
-            editingPost={editingPost}
-            editContent={editContent}
-            replyingTo={replyingTo}
-            replyContent={replyContent}
-            setEditContent={setEditContent}
-            setReplyContent={setReplyContent}
-            setReplyingTo={setReplyingTo}
-            handleEdit={handleEdit}
-            handleDelete={handleDelete}
-            handleSaveEdit={handleSaveEdit}
-            handleReply={handleReply}
-          />
-        ))}
-      </div>
+      <PostList
+        posts={posts}
+        user={user}
+        editingPost={editingPost}
+        editContent={editContent}
+        replyingTo={replyingTo}
+        replyContent={replyContent}
+        setEditContent={setEditContent}
+        setReplyContent={setReplyContent}
+        setReplyingTo={setReplyingTo}
+        handleEdit={handleEdit}
+        handleDelete={handleDelete}
+        handleSaveEdit={handleSaveEdit}
+        handleReply={handleReply}
+      />
     </div>
   );
 };
