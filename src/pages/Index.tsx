@@ -1,9 +1,8 @@
 
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { MessageSquare, Edit2, Trash2, Reply } from "lucide-react";
+import { Post } from "@/components/bbs/Post";
+import { PostForm } from "@/components/bbs/PostForm";
 
 interface Post {
   id: string;
@@ -103,136 +102,31 @@ const Index = () => {
   return (
     <div className="space-y-8 max-w-3xl mx-auto">
       {user && (
-        <div className="bbs-card fade-in">
-          <Textarea
-            placeholder="What's on your mind?"
-            value={newPost}
-            onChange={(e) => setNewPost(e.target.value)}
-            className="bbs-input w-full mb-4"
-          />
-          <Button onClick={handlePost} className="bbs-button">
-            Post
-          </Button>
-        </div>
+        <PostForm
+          newPost={newPost}
+          setNewPost={setNewPost}
+          handlePost={handlePost}
+        />
       )}
 
       <div className="space-y-4">
         {posts.map((post) => (
-          <div key={post.id} className="bbs-card fade-in">
-            <div className="flex items-start gap-4">
-              {post.authorIcon ? (
-                <img
-                  src={post.authorIcon}
-                  alt={post.author}
-                  className="w-10 h-10 rounded-full"
-                />
-              ) : (
-                <MessageSquare className="w-10 h-10" />
-              )}
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-bold">{post.author}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {post.createdAt.toLocaleString()}
-                  </span>
-                </div>
-
-                {editingPost === post.id ? (
-                  <div className="space-y-2">
-                    <Textarea
-                      value={editContent}
-                      onChange={(e) => setEditContent(e.target.value)}
-                      className="bbs-input w-full"
-                    />
-                    <Button
-                      onClick={() => handleSaveEdit(post.id)}
-                      className="bbs-button"
-                    >
-                      Save
-                    </Button>
-                  </div>
-                ) : (
-                  <p className="mb-4">{post.content}</p>
-                )}
-
-                <div className="flex items-center gap-2">
-                  {user && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setReplyingTo(post.id)}
-                    >
-                      <Reply className="w-4 h-4 mr-1" /> Reply
-                    </Button>
-                  )}
-                  {user && user.username === post.author && editingPost !== post.id && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(post.id)}
-                      >
-                        <Edit2 className="w-4 h-4 mr-1" /> Edit
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(post.id)}
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" /> Delete
-                      </Button>
-                    </>
-                  )}
-                </div>
-
-                {replyingTo === post.id && (
-                  <div className="mt-4 space-y-2">
-                    <Textarea
-                      placeholder="Write a reply..."
-                      value={replyContent}
-                      onChange={(e) => setReplyContent(e.target.value)}
-                      className="bbs-input w-full"
-                    />
-                    <Button
-                      onClick={() => handleReply(post.id)}
-                      className="bbs-button"
-                    >
-                      Reply
-                    </Button>
-                  </div>
-                )}
-
-                {post.replies && post.replies.length > 0 && (
-                  <div className="mt-4 space-y-4 pl-4 border-l border-border">
-                    {post.replies.map((reply) => (
-                      <div key={reply.id} className="fade-in">
-                        <div className="flex items-start gap-4">
-                          {reply.authorIcon ? (
-                            <img
-                              src={reply.authorIcon}
-                              alt={reply.author}
-                              className="w-8 h-8 rounded-full"
-                            />
-                          ) : (
-                            <MessageSquare className="w-8 h-8" />
-                          )}
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-bold">{reply.author}</span>
-                              <span className="text-sm text-muted-foreground">
-                                {reply.createdAt.toLocaleString()}
-                              </span>
-                            </div>
-                            <p>{reply.content}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <Post
+            key={post.id}
+            post={post}
+            user={user}
+            editingPost={editingPost}
+            editContent={editContent}
+            replyingTo={replyingTo}
+            replyContent={replyContent}
+            setEditContent={setEditContent}
+            setReplyContent={setReplyContent}
+            setReplyingTo={setReplyingTo}
+            handleEdit={handleEdit}
+            handleDelete={handleDelete}
+            handleSaveEdit={handleSaveEdit}
+            handleReply={handleReply}
+          />
         ))}
       </div>
     </div>
@@ -240,4 +134,3 @@ const Index = () => {
 };
 
 export default Index;
-
