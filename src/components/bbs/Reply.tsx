@@ -13,7 +13,7 @@ interface ReplyProps {
 
 export const Reply = ({ reply }: ReplyProps) => {
   return (
-    <div className="bbs-card bg-secondary/30 p-4 fade-in">
+    <div className="bbs-card p-4 fade-in">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
