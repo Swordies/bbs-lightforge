@@ -77,79 +77,82 @@ export const Post = ({
     <div className="space-y-8">
       <div className="bbs-card fade-in">
         <div className="flex items-start gap-4">
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                {post.authorIcon ? (
-                  <img
-                    src={post.authorIcon}
-                    alt={post.author}
-                    className="w-12 h-12 rounded-none border border-primary/50 object-cover"
-                  />
-                ) : (
-                  <MessageSquare className="w-12 h-12" />
-                )}
-                <span className="font-bold px-2 py-1 border border-primary/50">{post.author}</span>
-              </div>
-              <span className="text-sm text-muted-foreground border border-primary/20 px-2">
-                {post.createdAt.toLocaleString()}
-              </span>
-            </div>
-
-            {editingPost === post.id ? (
-              <div className="space-y-2">
-                <Textarea
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  className="bbs-input w-full min-h-[100px]"
-                />
-                <Button
-                  onClick={() => handleSaveEdit(post.id)}
-                  className="bbs-button"
-                >
-                  Save
-                </Button>
-              </div>
+          <div className="flex-shrink-0">
+            {post.authorIcon ? (
+              <img
+                src={post.authorIcon}
+                alt={post.author}
+                className="w-12 h-12 rounded-none border border-primary/50 object-cover"
+              />
             ) : (
-              <div className="mb-4 px-4 py-2 border border-primary/20">
-                {post.content}
-              </div>
+              <MessageSquare className="w-12 h-12" />
             )}
+            <div className="text-sm mt-2 text-center font-bold px-2 py-1 border border-primary/50">
+              {post.author}
+            </div>
+          </div>
+          
+          <div className="flex-1">
+            <div className="speech-bubble">
+              <div className="text-sm text-muted-foreground border border-primary/20 px-2 mb-4 inline-block">
+                {post.createdAt.toLocaleString()}
+              </div>
 
-            {!editingPost && (
-              <div className="flex items-center gap-2 mt-4">
-                {user && (
+              {editingPost === post.id ? (
+                <div className="space-y-2">
+                  <Textarea
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    className="bbs-input w-full min-h-[100px]"
+                  />
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setReplyingTo(post.id)}
+                    onClick={() => handleSaveEdit(post.id)}
                     className="bbs-button"
                   >
-                    <ReplyIcon className="w-4 h-4 mr-1" /> Reply
+                    Save
                   </Button>
-                )}
-                {user && user.username === post.author && (
-                  <>
+                </div>
+              ) : (
+                <div className="mb-4">
+                  {post.content}
+                </div>
+              )}
+
+              {!editingPost && (
+                <div className="flex items-center gap-2 mt-4">
+                  {user && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleEdit(post.id)}
+                      onClick={() => setReplyingTo(post.id)}
                       className="bbs-button"
                     >
-                      <Edit2 className="w-4 h-4 mr-1" /> Edit
+                      <ReplyIcon className="w-4 h-4 mr-1" /> Reply
                     </Button>
-                    <Button
-                      variant={deleteConfirmId === post.id ? "destructive" : "ghost"}
-                      size="sm"
-                      onClick={(e) => handleDeleteClick(post.id, e)}
-                      className="bbs-button"
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" /> Delete
-                    </Button>
-                  </>
-                )}
-              </div>
-            )}
+                  )}
+                  {user && user.username === post.author && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(post.id)}
+                        className="bbs-button"
+                      >
+                        <Edit2 className="w-4 h-4 mr-1" /> Edit
+                      </Button>
+                      <Button
+                        variant={deleteConfirmId === post.id ? "destructive" : "ghost"}
+                        size="sm"
+                        onClick={(e) => handleDeleteClick(post.id, e)}
+                        className="bbs-button"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" /> Delete
+                      </Button>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
 
             {replyingTo === post.id && !editingPost && (
               <ReplyForm

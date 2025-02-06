@@ -48,26 +48,8 @@
 }
 
 .bbs-card {
-  @apply border-2 border-primary/50 rounded-none p-4 transition-all duration-300 bg-secondary/20;
+  @apply p-4 transition-all duration-300;
   position: relative;
-}
-
-.bbs-card::before {
-  content: "+---";
-  position: absolute;
-  top: -1.5rem;
-  left: 0;
-  color: hsl(var(--primary));
-  opacity: 0.5;
-}
-
-.bbs-card::after {
-  content: "---+";
-  position: absolute;
-  bottom: -1.5rem;
-  right: 0;
-  color: hsl(var(--primary));
-  opacity: 0.5;
 }
 
 .bbs-input {
@@ -75,22 +57,18 @@
 }
 
 .bbs-button {
-  @apply bg-primary text-primary-foreground px-4 py-2 rounded-none hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply text-primary px-4 py-2 hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-transparent;
   position: relative;
 }
 
 .bbs-button::before {
-  content: "[";
-  position: absolute;
-  left: -4px;
-  color: hsl(var(--primary));
+  content: "[ ";
+  opacity: 0.5;
 }
 
 .bbs-button::after {
-  content: "]";
-  position: absolute;
-  right: -4px;
-  color: hsl(var(--primary));
+  content: " ]";
+  opacity: 0.5;
 }
 
 .fade-in {
@@ -107,3 +85,29 @@
     transform: translateY(0);
   }
 }
+
+.speech-bubble {
+  @apply relative ml-6 p-4 bg-secondary/20 border-2 border-primary/50;
+}
+
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 20px;
+  border-style: solid;
+  border-width: 10px 12px 10px 0;
+  border-color: transparent hsl(var(--primary) / 0.5) transparent transparent;
+}
+
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  left: -9px;
+  top: 20px;
+  border-style: solid;
+  border-width: 10px 12px 10px 0;
+  border-color: transparent hsl(var(--background)) transparent transparent;
+  z-index: 1;
+}
+
