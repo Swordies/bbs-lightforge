@@ -16,7 +16,24 @@ interface Post {
 
 const Index = () => {
   const { user } = useAuth();
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<Post[]>([
+    {
+      id: "welcome",
+      content: "Welcome to ASCII BBS! This is a minimalist bulletin board system where you can share your thoughts and connect with others. Feel free to register and join the conversation!",
+      author: "Admin",
+      authorIcon: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=100&h=100&fit=crop",
+      createdAt: new Date("2024-01-01T12:00:00"),
+      replies: [
+        {
+          id: "welcome-reply",
+          content: "Thanks for creating this space! The retro aesthetic brings back memories of the early internet days.",
+          author: "RetroFan",
+          authorIcon: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=100&h=100&fit=crop",
+          createdAt: new Date("2024-01-01T12:30:00"),
+        },
+      ],
+    },
+  ]);
   const [newPost, setNewPost] = useState("");
   const [editingPost, setEditingPost] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
@@ -138,51 +155,50 @@ const Index = () => {
                   <p className="mb-4">{post.content}</p>
                 )}
 
-                {user && user.username === post.author && editingPost !== post.id && (
-                  <div className="flex gap-2">
+                <div className="flex items-center gap-2">
+                  {user && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleEdit(post.id)}
+                      onClick={() => setReplyingTo(post.id)}
                     >
-                      <Edit2 className="w-4 h-4 mr-1" /> Edit
+                      <Reply className="w-4 h-4 mr-1" /> Reply
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(post.id)}
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" /> Delete
-                    </Button>
-                  </div>
-                )}
-
-                {user && (
-                  <div className="mt-4">
-                    {replyingTo === post.id ? (
-                      <div className="space-y-2">
-                        <Textarea
-                          placeholder="Write a reply..."
-                          value={replyContent}
-                          onChange={(e) => setReplyContent(e.target.value)}
-                          className="bbs-input w-full"
-                        />
-                        <Button
-                          onClick={() => handleReply(post.id)}
-                          className="bbs-button"
-                        >
-                          Reply
-                        </Button>
-                      </div>
-                    ) : (
+                  )}
+                  {user && user.username === post.author && editingPost !== post.id && (
+                    <>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setReplyingTo(post.id)}
+                        onClick={() => handleEdit(post.id)}
                       >
-                        <Reply className="w-4 h-4 mr-1" /> Reply
+                        <Edit2 className="w-4 h-4 mr-1" /> Edit
                       </Button>
-                    )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(post.id)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" /> Delete
+                      </Button>
+                    </>
+                  )}
+                </div>
+
+                {replyingTo === post.id && (
+                  <div className="mt-4 space-y-2">
+                    <Textarea
+                      placeholder="Write a reply..."
+                      value={replyContent}
+                      onChange={(e) => setReplyContent(e.target.value)}
+                      className="bbs-input w-full"
+                    />
+                    <Button
+                      onClick={() => handleReply(post.id)}
+                      className="bbs-button"
+                    >
+                      Reply
+                    </Button>
                   </div>
                 )}
 
@@ -224,3 +240,4 @@ const Index = () => {
 };
 
 export default Index;
+
