@@ -34,19 +34,27 @@ export const Header = () => {
   };
 
   return (
-    <header className="border-b border-border/50 backdrop-blur-sm fixed top-0 left-0 right-0 z-50">
+    <header className="border-y border-border/50 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 bg-background/95">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link to="/" className="text-xl font-bold hover:opacity-80 transition-opacity">ASCII BBS</Link>
+        <Link to="/" className="text-xl font-bold hover:opacity-80 transition-opacity ascii-border">
+          <pre className="font-mono text-primary">
+           _    ____ ____ ___ ____    ___  ___  ____ 
+          / \  / ___/ ___|_ _|_ _|  | _ )| _ )/ ___| 
+         / _ \ \___ \___ \| | | |   | _ \| _ \\___ \ 
+        / ___ \ ___) |__) | | | |   | |_) | |_) |__) |
+       /_/   \_\____/____/___|___|  |___/|___/|____/ 
+          </pre>
+        </Link>
         <div className="flex items-center gap-4">
           {user ? (
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 {user.iconUrl ? (
-                  <img src={user.iconUrl} alt={user.username} className="w-8 h-8 rounded-full object-cover" />
+                  <img src={user.iconUrl} alt={user.username} className="w-8 h-8 object-cover border border-primary/50" />
                 ) : (
                   <UserCircle className="w-8 h-8" />
                 )}
-                <span>{user.username}</span>
+                <span className="font-mono">{user.username}</span>
                 <Button variant="ghost" size="icon" onClick={() => setShowIconInput(!showIconInput)}>
                   <ImagePlus className="w-4 h-4" />
                 </Button>

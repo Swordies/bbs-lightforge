@@ -64,7 +64,7 @@ export const Post = ({
   }, [deleteConfirmId]);
 
   const handleDeleteClick = (postId: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent the click from bubbling up to the document
+    e.stopPropagation();
     if (deleteConfirmId === postId) {
       handleDelete(postId);
       setDeleteConfirmId(null);
@@ -77,19 +77,14 @@ export const Post = ({
     <div className="space-y-4">
       <div className="bbs-card fade-in">
         <div className="flex items-start gap-4">
-          {post.authorIcon ? (
-            <img
-              src={post.authorIcon}
-              alt={post.author}
-              className="w-[100px] h-[100px] rounded-full object-cover"
-            />
-          ) : (
-            <MessageSquare className="w-[100px] h-[100px]" />
-          )}
           <div className="flex-1">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-bold">{post.author}</span>
-              <span className="text-sm text-muted-foreground">
+              <span className="font-mono text-primary">
+                {"["}
+                {post.author}
+                {"]"}
+              </span>
+              <span className="text-sm text-muted-foreground font-mono">
                 {post.createdAt.toLocaleString()}
               </span>
             </div>
@@ -99,17 +94,17 @@ export const Post = ({
                 <Textarea
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
-                  className="bbs-input w-full"
+                  className="bbs-input w-full font-mono"
                 />
                 <Button
                   onClick={() => handleSaveEdit(post.id)}
-                  className="bbs-button"
+                  className="bbs-button font-mono"
                 >
                   Save
                 </Button>
               </div>
             ) : (
-              <p className="mb-4">{post.content}</p>
+              <pre className="mb-4 whitespace-pre-wrap font-mono">{post.content}</pre>
             )}
 
             {!editingPost && (
@@ -119,6 +114,7 @@ export const Post = ({
                     variant="ghost"
                     size="sm"
                     onClick={() => setReplyingTo(post.id)}
+                    className="font-mono"
                   >
                     <ReplyIcon className="w-4 h-4 mr-1" /> Reply
                   </Button>
@@ -129,6 +125,7 @@ export const Post = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => handleEdit(post.id)}
+                      className="font-mono"
                     >
                       <Edit2 className="w-4 h-4 mr-1" /> Edit
                     </Button>
@@ -136,6 +133,7 @@ export const Post = ({
                       variant={deleteConfirmId === post.id ? "destructive" : "ghost"}
                       size="sm"
                       onClick={(e) => handleDeleteClick(post.id, e)}
+                      className="font-mono"
                     >
                       <Trash2 className="w-4 h-4 mr-1" /> Delete
                     </Button>
@@ -153,11 +151,18 @@ export const Post = ({
               />
             )}
           </div>
+          {post.authorIcon && (
+            <img
+              src={post.authorIcon}
+              alt={post.author}
+              className="w-[50px] h-[50px] object-cover border border-primary/50"
+            />
+          )}
         </div>
       </div>
 
       {post.replies && post.replies.length > 0 && (
-        <div className="pl-8 space-y-4">
+        <div className="pl-8 space-y-4 border-l border-border/30">
           {post.replies.map((reply) => (
             <Reply key={reply.id} reply={reply} />
           ))}
