@@ -1,5 +1,6 @@
 
 import { MessageSquare } from "lucide-react";
+import { getContrastColor } from "@/lib/colorUtils";
 
 interface PostAuthorProps {
   author: string;
@@ -21,10 +22,14 @@ export const PostAuthor = ({ author, authorIcon, usernameBoxColor }: PostAuthorP
       )}
       <div 
         className="text-sm mt-2 text-center font-bold px-2 py-1 border border-primary/50"
-        style={usernameBoxColor ? { backgroundColor: usernameBoxColor } : undefined}
+        style={usernameBoxColor ? { 
+          backgroundColor: usernameBoxColor,
+          color: getContrastColor(usernameBoxColor)
+        } : undefined}
       >
         {author}
       </div>
     </div>
   );
 };
+
