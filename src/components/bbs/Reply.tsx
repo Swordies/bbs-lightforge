@@ -37,7 +37,7 @@ export const Reply = ({ reply }: ReplyProps) => {
               {reply.createdAt.toLocaleString()}
             </div>
             <div 
-              className="[&_strong]:font-bold [&_em]:italic [&_u]:border-b-2 [&_s]:line-through [&_br]:block"
+              className="[&_strong]:font-bold [&_em]:italic [&_s]:line-through [&_br]:block"
               dangerouslySetInnerHTML={{ __html: formatText(reply.content) }} 
             />
           </div>
