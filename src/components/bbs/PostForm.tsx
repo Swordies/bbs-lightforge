@@ -15,17 +15,9 @@ type FormatType = 'bold' | 'italic' | 'list' | 'strikethrough';
 
 export const PostForm = ({ newPost, setNewPost, handlePost, isEditing }: PostFormProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [activeFormats, setActiveFormats] = useState<FormatType[]>([]);
-  const [formatPositions, setFormatPositions] = useState<Record<FormatType, number>>({
-    bold: -1,
-    italic: -1,
-    list: -1,
-    strikethrough: -1
-  });
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.ctrlKey || e.metaKey) {
-      const start = e.currentTarget.selectionStart;
       let formatType: FormatType | null = null;
 
       switch (e.key.toLowerCase()) {
@@ -48,7 +40,7 @@ export const PostForm = ({ newPost, setNewPost, handlePost, isEditing }: PostFor
       }
 
       if (formatType) {
-        toggleFormat(formatType, start);
+        applyFormat(formatType);
       }
     }
   };
@@ -66,85 +58,82 @@ export const PostForm = ({ newPost, setNewPost, handlePost, isEditing }: PostFor
     }
   };
 
-  const toggleFormat = (type: FormatType, cursorPos: number) => {
-    if (activeFormats.includes(type)) {
-      // Close the format
-      const syntax = getFormatSyntax(type);
-      const newValue = newPost + syntax.closing;
-      setNewPost(newValue);
-      setActiveFormats(activeFormats.filter(f => f !== type));
-      setFormatPositions(prev => ({ ...prev, [type]: -1 }));
+  const applyFormat = (type: FormatType) => {
+    if (!textareaRef.current) return;
 
-      // Set cursor position after the closing syntax
+    const textarea = textareaRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = newPost.substring(start, end);
+    const syntax = getFormatSyntax(type);
+
+    if (start === end && type === 'list') {
+      // If no text is selected and it's a list, just add the list marker
+      const newValue = newPost.substring(0, start) + syntax.opening + newPost.substring(end);
+      setNewPost(newValue);
+      
+      // Set cursor position after the list marker
       setTimeout(() => {
-        if (textareaRef.current) {
-          const newPos = newValue.length;
-          textareaRef.current.selectionStart = newPos;
-          textareaRef.current.selectionEnd = newPos;
-          textareaRef.current.focus();
-        }
+        const newPosition = start + syntax.opening.length;
+        textarea.selectionStart = newPosition;
+        textarea.selectionEnd = newPosition;
+        textarea.focus();
       }, 0);
     } else {
-      // Open the format
-      const syntax = getFormatSyntax(type);
-      const newValue = newPost + syntax.opening;
+      // For other formats or when text is selected
+      const newValue = newPost.substring(0, start) + 
+                      syntax.opening + 
+                      selectedText + 
+                      syntax.closing + 
+                      newPost.substring(end);
       setNewPost(newValue);
-      setActiveFormats([...activeFormats, type]);
-      setFormatPositions(prev => ({ ...prev, [type]: cursorPos }));
 
-      // Set cursor position after the opening syntax
+      // Maintain selection including the formatting syntax
       setTimeout(() => {
-        if (textareaRef.current) {
-          const newPos = newValue.length;
-          textareaRef.current.selectionStart = newPos;
-          textareaRef.current.selectionEnd = newPos;
-          textareaRef.current.focus();
-        }
+        const newStart = start + syntax.opening.length;
+        const newEnd = end + syntax.opening.length;
+        textarea.selectionStart = newStart;
+        textarea.selectionEnd = newEnd;
+        textarea.focus();
       }, 0);
     }
-  };
-
-  const formatText = (type: FormatType) => {
-    if (!textareaRef.current) return;
-    const cursorPos = textareaRef.current.selectionStart;
-    toggleFormat(type, cursorPos);
   };
 
   return (
     <div className="bbs-card fade-in space-y-4">
       <div className="flex gap-2">
         <Button 
-          variant={activeFormats.includes('bold') ? "default" : "outline"}
+          variant="outline"
           size="icon"
-          onClick={() => formatText('bold')}
-          className={`bbs-button ${activeFormats.includes('bold') ? 'bg-[#1A1F2C] text-white' : ''}`}
+          onClick={() => applyFormat('bold')}
+          className="bbs-button hover:bg-[#1A1F2C] hover:text-white"
           title="Bold (Ctrl+B)"
         >
           <Bold className="h-4 w-4" />
         </Button>
         <Button 
-          variant={activeFormats.includes('italic') ? "default" : "outline"}
+          variant="outline"
           size="icon"
-          onClick={() => formatText('italic')}
-          className={`bbs-button ${activeFormats.includes('italic') ? 'bg-[#1A1F2C] text-white' : ''}`}
+          onClick={() => applyFormat('italic')}
+          className="bbs-button hover:bg-[#1A1F2C] hover:text-white"
           title="Italic (Ctrl+I)"
         >
           <Italic className="h-4 w-4" />
         </Button>
         <Button 
-          variant={activeFormats.includes('strikethrough') ? "default" : "outline"}
+          variant="outline"
           size="icon"
-          onClick={() => formatText('strikethrough')}
-          className={`bbs-button ${activeFormats.includes('strikethrough') ? 'bg-[#1A1F2C] text-white' : ''}`}
+          onClick={() => applyFormat('strikethrough')}
+          className="bbs-button hover:bg-[#1A1F2C] hover:text-white"
           title="Strikethrough (Ctrl+S)"
         >
           <Strikethrough className="h-4 w-4" />
         </Button>
         <Button 
-          variant={activeFormats.includes('list') ? "default" : "outline"}
+          variant="outline"
           size="icon"
-          onClick={() => formatText('list')}
-          className={`bbs-button ${activeFormats.includes('list') ? 'bg-[#1A1F2C] text-white' : ''}`}
+          onClick={() => applyFormat('list')}
+          className="bbs-button hover:bg-[#1A1F2C] hover:text-white"
           title="List (Ctrl+-)"
         >
           <List className="h-4 w-4" />
@@ -166,3 +155,4 @@ export const PostForm = ({ newPost, setNewPost, handlePost, isEditing }: PostFor
     </div>
   );
 };
+

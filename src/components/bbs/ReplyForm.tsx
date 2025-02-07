@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { PostForm } from "./PostForm";
 
 interface ReplyFormProps {
   replyContent: string;
@@ -12,20 +13,15 @@ interface ReplyFormProps {
 export const ReplyForm = ({ replyContent, setReplyContent, handleReply, onCancel }: ReplyFormProps) => {
   return (
     <div className="mt-4 space-y-2">
-      <Textarea
-        placeholder="Write a reply..."
-        value={replyContent}
-        onChange={(e) => setReplyContent(e.target.value)}
-        className="bbs-input w-full"
+      <PostForm
+        newPost={replyContent}
+        setNewPost={setReplyContent}
+        handlePost={handleReply}
       />
-      <div className="flex gap-2">
-        <Button onClick={handleReply} className="bbs-button">
-          Reply
-        </Button>
-        <Button onClick={onCancel} variant="outline">
-          Cancel
-        </Button>
-      </div>
+      <Button onClick={onCancel} variant="outline" className="mt-2">
+        Cancel
+      </Button>
     </div>
   );
 };
+
