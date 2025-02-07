@@ -1,63 +1,53 @@
 
 import { create } from "zustand";
-import Cookies from "js-cookie";
-
-interface User {
-  id: string;
-  username: string;
-  iconUrl?: string;
-}
+import { supabase } from "@/lib/supabase";
+import { User } from "@supabase/supabase-js";
 
 interface AuthState {
   user: User | null;
-  login: (username: string, password: string) => Promise<void>;
-  register: (username: string, password: string) => Promise<void>;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
   updateIcon: (iconUrl: string) => Promise<void>;
 }
 
-const COOKIE_KEY = 'user';
-const COOKIE_EXPIRES = 30; // days
-
-// Memoized initial user state from cookies
-const getInitialUser = (): User | null => {
-  try {
-    const userCookie = Cookies.get(COOKIE_KEY);
-    return userCookie ? JSON.parse(userCookie) : null;
-  } catch {
-    // If cookie parsing fails, remove corrupted cookie and return null
-    Cookies.remove(COOKIE_KEY);
-    return null;
-  }
-};
-
 export const useAuth = create<AuthState>((set) => ({
-  user: getInitialUser(),
+  user: null,
   
-  login: async (username: string, password: string) => {
-    const user: User = { id: "1", username };
-    Cookies.set(COOKIE_KEY, JSON.stringify(user), { expires: COOKIE_EXPIRES });
-    set({ user });
+  login: async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw error;
+    set({ user: data.user });
   },
   
-  register: async (username: string, password: string) => {
-    const user: User = { id: "1", username };
-    Cookies.set(COOKIE_KEY, JSON.stringify(user), { expires: COOKIE_EXPIRES });
-    set({ user });
+  register: async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    if (error) throw error;
+    set({ user: data.user });
   },
   
-  logout: () => {
-    Cookies.remove(COOKIE_KEY);
+  logout: async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
     set({ user: null });
   },
   
   updateIcon: async (iconUrl: string) => {
-    set((state) => {
-      if (!state.user) return state;
-      
-      const updatedUser = { ...state.user, iconUrl };
-      Cookies.set(COOKIE_KEY, JSON.stringify(updatedUser), { expires: COOKIE_EXPIRES });
-      return { user: updatedUser };
+    const { data: { user }, error } = await supabase.auth.updateUser({
+      data: { avatar_url: iconUrl }
     });
+    if (error) throw error;
+    if (user) set({ user });
   }
 }));
+
+// Initialize auth state
+supabase.auth.onAuthStateChange((event, session) => {
+  useAuth.setState({ user: session?.user || null });
+});

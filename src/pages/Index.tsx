@@ -1,70 +1,117 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Post } from "@/components/bbs/Post";
 import { PostForm } from "@/components/bbs/PostForm";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Post {
   id: string;
   content: string;
-  author: string;
-  authorIcon?: string;
-  createdAt: Date;
+  author: {
+    email: string;
+    avatar_url?: string;
+  };
+  created_at: string;
   replies?: Post[];
 }
 
-const generateRandomId = () => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 15; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-};
-
 const Index = () => {
   const { user } = useAuth();
-  const [posts, setPosts] = useState<Post[]>([
-    {
-      id: "xK9nM2pQ5vR8sT3",
-      content: "Welcome to ASCII BBS! This is a minimalist bulletin board system where you can share your thoughts and connect with others. Feel free to register and join the conversation!",
-      author: "Admin",
-      authorIcon: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=100&h=100&fit=crop",
-      createdAt: new Date("2024-01-01T12:00:00"),
-      replies: [
-        {
-          id: "hJ4wL7yB9cN6mD1",
-          content: "Thanks for creating this space! The retro aesthetic brings back memories of the early internet days.",
-          author: "RetroFan",
-          authorIcon: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=100&h=100&fit=crop",
-          createdAt: new Date("2024-01-01T12:30:00"),
-        },
-      ],
-    },
-  ]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [newPost, setNewPost] = useState("");
   const [editingPost, setEditingPost] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
+  const { toast } = useToast();
 
-  const handlePost = () => {
-    if (!user || !newPost.trim()) return;
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
-    const post: Post = {
-      id: generateRandomId(),
-      content: newPost,
-      author: user.username,
-      authorIcon: user.iconUrl,
-      createdAt: new Date(),
-      replies: [],
-    };
+  const fetchPosts = async () => {
+    const { data, error } = await supabase
+      .from('posts')
+      .select(`
+        id,
+        content,
+        created_at,
+        author:author_id(
+          email,
+          raw_user_meta_data
+        )
+      `)
+      .is('parent_id', null)
+      .order('created_at', { ascending: false });
 
-    setPosts([post, ...posts]);
-    setNewPost("");
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch posts",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const postsWithReplies = await Promise.all(
+      (data || []).map(async (post) => {
+        const { data: replies } = await supabase
+          .from('posts')
+          .select(`
+            id,
+            content,
+            created_at,
+            author:author_id(
+              email,
+              raw_user_meta_data
+            )
+          `)
+          .eq('parent_id', post.id)
+          .order('created_at', { ascending: true });
+
+        return {
+          ...post,
+          replies: replies || [],
+          author: {
+            email: post.author.email,
+            avatar_url: post.author.raw_user_meta_data?.avatar_url,
+          },
+        };
+      })
+    );
+
+    setPosts(postsWithReplies);
   };
 
-  const handleEdit = (postId: string) => {
+  const handlePost = async () => {
+    if (!user || !newPost.trim()) return;
+
+    try {
+      const { error } = await supabase.from('posts').insert({
+        content: newPost,
+        author_id: user.id,
+      });
+
+      if (error) throw error;
+
+      setNewPost("");
+      fetchPosts();
+      toast({
+        title: "Success",
+        description: "Post created successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create post",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEdit = async (postId: string) => {
     const post = posts.find((p) => p.id === postId);
     if (post) {
       setEditingPost(postId);
@@ -72,40 +119,80 @@ const Index = () => {
     }
   };
 
-  const handleSaveEdit = (postId: string) => {
-    setPosts(
-      posts.map((post) =>
-        post.id === postId ? { ...post, content: editContent } : post
-      )
-    );
-    setEditingPost(null);
-    setEditContent("");
+  const handleSaveEdit = async (postId: string) => {
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .update({ content: editContent })
+        .eq('id', postId);
+
+      if (error) throw error;
+
+      setEditingPost(null);
+      setEditContent("");
+      fetchPosts();
+      toast({
+        title: "Success",
+        description: "Post updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update post",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDelete = (postId: string) => {
-    setPosts(posts.filter((post) => post.id !== postId));
+  const handleDelete = async (postId: string) => {
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', postId);
+
+      if (error) throw error;
+
+      fetchPosts();
+      toast({
+        title: "Success",
+        description: "Post deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete post",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleReply = (postId: string) => {
+  const handleReply = async (postId: string) => {
     if (!user || !replyContent.trim()) return;
 
-    const reply: Post = {
-      id: generateRandomId(),
-      content: replyContent,
-      author: user.username,
-      authorIcon: user.iconUrl,
-      createdAt: new Date(),
-    };
+    try {
+      const { error } = await supabase.from('posts').insert({
+        content: replyContent,
+        author_id: user.id,
+        parent_id: postId,
+      });
 
-    setPosts(
-      posts.map((post) =>
-        post.id === postId
-          ? { ...post, replies: [...(post.replies || []), reply] }
-          : post
-      )
-    );
-    setReplyingTo(null);
-    setReplyContent("");
+      if (error) throw error;
+
+      setReplyingTo(null);
+      setReplyContent("");
+      fetchPosts();
+      toast({
+        title: "Success",
+        description: "Reply posted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to post reply",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -122,8 +209,13 @@ const Index = () => {
         {posts.map((post) => (
           <Post
             key={post.id}
-            post={post}
-            user={user}
+            post={{
+              ...post,
+              author: post.author.email,
+              authorIcon: post.author.avatar_url,
+              createdAt: new Date(post.created_at),
+            }}
+            user={user ? { username: user.email } : null}
             editingPost={editingPost}
             editContent={editContent}
             replyingTo={replyingTo}
