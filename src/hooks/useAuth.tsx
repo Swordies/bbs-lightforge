@@ -1,7 +1,6 @@
 
 import { create } from "zustand";
 import { supabase } from "@/integrations/supabase/client";
-import { Profile } from "@/types/bbs";
 import { toast } from "@/components/ui/use-toast";
 
 interface User {
@@ -12,8 +11,8 @@ interface User {
 
 interface AuthState {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
+  register: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   updateIcon: (iconUrl: string) => Promise<void>;
 }
@@ -21,9 +20,10 @@ interface AuthState {
 export const useAuth = create<AuthState>((set) => ({
   user: null,
   
-  login: async (email: string, password: string) => {
+  login: async (username: string, password: string) => {
+    // For username-based login, we'll use the username as the email
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: `${username}@example.com`,
       password,
     });
 
@@ -57,9 +57,9 @@ export const useAuth = create<AuthState>((set) => ({
     }
   },
   
-  register: async (username: string, email: string, password: string) => {
+  register: async (username: string, password: string) => {
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: `${username}@example.com`,
       password,
       options: {
         data: {

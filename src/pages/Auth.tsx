@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login, register } = useAuth();
   const navigate = useNavigate();
@@ -17,9 +16,9 @@ const Auth = () => {
     e.preventDefault();
     try {
       if (isLogin) {
-        await login(email, password);
+        await login(username, password);
       } else {
-        await register(username, email, password);
+        await register(username, password);
       }
       navigate("/");
     } catch (error) {
@@ -34,23 +33,12 @@ const Auth = () => {
           {isLogin ? "Login" : "Register"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <div>
-              <Input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="bbs-input w-full"
-              />
-            </div>
-          )}
           <div>
             <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="bbs-input w-full"
             />
           </div>
@@ -82,4 +70,3 @@ const Auth = () => {
 };
 
 export default Auth;
-
