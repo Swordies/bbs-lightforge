@@ -42,38 +42,40 @@ const fetchPosts = async () => {
   return data;
 };
 
-const WelcomeMessage = () => (
-  <div className="bbs-card fade-in">
-    <div className="flex items-start gap-4">
-      <div className="flex-shrink-0">
-        <img
-          src="https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=100&h=100&fit=crop"
-          alt="ASCII BBS"
-          className="w-[100px] h-[100px] rounded-none border border-primary/50 object-cover"
-        />
-        <div className="text-sm mt-2 text-center font-bold px-2 py-1 border border-primary/50">
-          ASCII BBS
-        </div>
-      </div>
-      <div className="flex-1">
-        <div className="speech-bubble">
-          <div className="text-sm text-muted-foreground border border-primary/20 px-2 inline-block mb-4">
-            {new Date().toLocaleString()}
-          </div>
-          <div className="mb-4 [&_strong]:font-bold [&_em]:italic [&_s]:line-through [&_br]:block">
-            <strong>Welcome to ASCII BBS!</strong><br /><br />
-            This is a <em>minimalist</em> bulletin board system where you can:
-            <br />- Share your thoughts
-            <br />- Connect with others
-            <br />- Use <strong>text formatting</strong>
-            <br /><br />
-            Feel free to register and join the conversation!
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-);
+const WelcomeMessage = () => {
+  const welcomePost = {
+    id: 'welcome',
+    content: `**Welcome to ASCII BBS!**\n\nThis is a *minimalist* bulletin board system where you can:\n- Share your thoughts\n- Connect with others\n- Use **text formatting**\n\nFeel free to register and join the conversation!`,
+    author: 'ASCII BBS',
+    authorIcon: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=100&h=100&fit=crop',
+    createdAt: new Date(),
+    replies: [{
+      id: 'welcome-reply',
+      content: "Hi there! This is what replies look like. They appear indented and aligned to the right. Try adding your own reply after logging in!",
+      author: 'ASCII Helper',
+      authorIcon: 'https://images.unsplash.com/photo-1635322966219-b75ed372eb01?w=100&h=100&fit=crop',
+      createdAt: new Date()
+    }]
+  };
+
+  return (
+    <PostContainer
+      post={welcomePost}
+      user={null}
+      editingPost={null}
+      editContent=""
+      replyingTo={null}
+      replyContent=""
+      setEditContent={() => {}}
+      setReplyContent={() => {}}
+      setReplyingTo={() => {}}
+      handleEdit={() => {}}
+      handleDelete={() => {}}
+      handleSaveEdit={() => {}}
+      handleReply={() => {}}
+    />
+  );
+};
 
 const Index = () => {
   const { user } = useAuth();
