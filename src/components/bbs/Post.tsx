@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare, Edit2, Trash2, Reply as ReplyIcon } from "lucide-react";
@@ -73,7 +74,7 @@ export const Post = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="bbs-card fade-in">
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0">
@@ -166,7 +167,7 @@ export const Post = ({
       </div>
 
       {post.replies && post.replies.length > 0 && (
-        <div className="pl-8 -mt-4 space-y-2">
+        <div className="pl-8 -mt-6 space-y-2">
           {post.replies.map((reply) => (
             <Reply key={reply.id} reply={reply} />
           ))}
