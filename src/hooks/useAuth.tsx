@@ -1,7 +1,6 @@
 
 import { create } from "zustand";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
 
 interface User {
   id: string;
@@ -21,68 +20,85 @@ export const useAuth = create<AuthState>((set) => ({
   user: null,
 
   login: async (username: string, password: string) => {
-    // For login, we'll use username as the email with a fake domain
-    const email = `${username.toLowerCase()}@ascii-bbs.local`;
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      // Ensure consistent email format with lowercase
+      const email = `${username.toLowerCase()}@ascii-bbs.local`;
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) throw error;
-
-    if (data.user) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('username, icon_url')
-        .eq('id', data.user.id)
-        .single();
-
-      if (profile) {
-        set({
-          user: {
-            id: data.user.id,
-            username: profile.username,
-            iconUrl: profile.icon_url || undefined,
-          },
-        });
+      if (error) {
+        // Enhance error message for invalid credentials
+        if (error.message === "Invalid login credentials") {
+          throw new Error("Invalid username or password. Please try again.");
+        }
+        throw error;
       }
+
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username, icon_url')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profile) {
+          set({
+            user: {
+              id: data.user.id,
+              username: profile.username,
+              iconUrl: profile.icon_url || undefined,
+            },
+          });
+        }
+      }
+    } catch (error) {
+      // Re-throw to maintain error chain
+      throw error;
     }
   },
 
   register: async (username: string, password: string) => {
-    // Check if username already exists
-    const { data: existingProfile } = await supabase
-      .from('profiles')
-      .select('username')
-      .eq('username', username)
-      .single();
+    try {
+      // Check if username already exists (case insensitive)
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('username')
+        .ilike('username', username)
+        .single();
 
-    if (existingProfile) {
-      throw new Error('Username already taken');
-    }
+      if (existingProfile) {
+        throw new Error('Username already taken');
+      }
 
-    // For registration, we'll use username as the email with a fake domain
-    const email = `${username.toLowerCase()}@ascii-bbs.local`;
-    
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username: username,
-        },
-      },
-    });
-
-    if (error) throw error;
-
-    if (data.user) {
-      set({
-        user: {
-          id: data.user.id,
-          username: username,
+      // Ensure consistent email format with lowercase
+      const email = `${username.toLowerCase()}@ascii-bbs.local`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username: username,
+          },
         },
       });
+
+      if (error) throw error;
+
+      if (data.user) {
+        set({
+          user: {
+            id: data.user.id,
+            username: username,
+          },
+        });
+      }
+    } catch (error) {
+      // Re-throw to maintain error chain
+      throw error;
     }
   },
 
@@ -93,20 +109,24 @@ export const useAuth = create<AuthState>((set) => ({
   },
 
   updateIcon: async (iconUrl: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) throw new Error('Not authenticated');
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) throw new Error('Not authenticated');
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({ icon_url: iconUrl })
-      .eq('id', user.id);
+      const { error } = await supabase
+        .from('profiles')
+        .update({ icon_url: iconUrl })
+        .eq('id', user.id);
 
-    if (error) throw error;
+      if (error) throw error;
 
-    set((state) => ({
-      user: state.user ? { ...state.user, iconUrl } : null,
-    }));
+      set((state) => ({
+        user: state.user ? { ...state.user, iconUrl } : null,
+      }));
+    } catch (error) {
+      throw error;
+    }
   },
 }));
 
