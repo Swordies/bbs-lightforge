@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { PostContainer } from "@/components/bbs/PostContainer";
@@ -34,7 +33,22 @@ const Index = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return posts as PostWithReplies[];
+
+      // Transform the data to match our component types
+      return posts.map((post: PostWithReplies) => ({
+        id: post.id,
+        content: post.content,
+        author: post.author.username,
+        authorIcon: post.author.icon_url,
+        createdAt: new Date(post.created_at),
+        replies: post.replies?.map(reply => ({
+          id: reply.id,
+          content: reply.content,
+          author: reply.author.username,
+          authorIcon: reply.author.icon_url,
+          createdAt: new Date(reply.created_at)
+        }))
+      }));
     }
   });
 
