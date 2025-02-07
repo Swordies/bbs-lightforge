@@ -8,5 +8,7 @@ export const formatText = (text: string): string => {
     // Underline
     .replace(/__(.*?)__/g, '<u>$1</u>')
     // Lists
-    .replace(/\n- (.*)/g, '<br/>• $1');
+    .replace(/\n- (.*)/g, '<br/>• $1')
+    // Additional line breaks
+    .replace(/\n/g, '<br/>');
 };

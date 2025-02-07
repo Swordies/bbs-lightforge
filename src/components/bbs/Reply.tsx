@@ -36,7 +36,10 @@ export const Reply = ({ reply }: ReplyProps) => {
             <div className="text-sm text-muted-foreground border border-primary/20 px-2 mb-4 inline-block">
               {reply.createdAt.toLocaleString()}
             </div>
-            <div dangerouslySetInnerHTML={{ __html: formatText(reply.content) }} />
+            <div 
+              className="whitespace-pre-wrap"
+              dangerouslySetInnerHTML={{ __html: formatText(reply.content) }} 
+            />
           </div>
         </div>
       </div>

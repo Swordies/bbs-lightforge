@@ -130,7 +130,7 @@ export const Post = ({
                 </div>
               ) : (
                 <div 
-                  className="mb-4"
+                  className="mb-4 whitespace-pre-wrap"
                   dangerouslySetInnerHTML={{ __html: formatText(post.content) }}
                 />
               )}
