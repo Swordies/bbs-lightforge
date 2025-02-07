@@ -2,15 +2,10 @@
 import PostAuthor from "./PostAuthor";
 import { PostContent } from "./PostContent";
 import { useDeleteConfirm } from "./useDeleteConfirm";
+import { type Post as PostType } from "@/types/channel";
 
 interface PostProps {
-  post: {
-    id: string;
-    content: string;
-    author: string;
-    authorIcon?: string;
-    createdAt: Date;
-  };
+  post: PostType;
   user: { username: string; usernameBoxColor?: string } | null;
   editingPost: string | null;
   editContent: string;
@@ -42,7 +37,7 @@ export const Post = ({
 }: PostProps) => {
   const { deleteConfirmId, setDeleteConfirmId, handleDeleteClick } = useDeleteConfirm();
 
-  const handlePostDeleteClick = (postId: string, e: React.MouseEvent) => {
+  const handlePostDeleteClick = (postId: string, e: React.MouseEvent<Element, MouseEvent>) => {
     if (handleDeleteClick(postId, e)) {
       handleDelete(postId);
       setDeleteConfirmId(null);
@@ -82,4 +77,3 @@ export const Post = ({
     </div>
   );
 };
-

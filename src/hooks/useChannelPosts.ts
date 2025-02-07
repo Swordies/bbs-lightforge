@@ -5,11 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const generateRandomId = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 15; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+  return Array.from({ length: 15 }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
 };
 
 export const useChannelPosts = (channelId: string) => {
@@ -21,22 +17,28 @@ export const useChannelPosts = (channelId: string) => {
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
 
+  // Memoize posts array to prevent unnecessary re-renders
+  const sortedPosts = useMemo(() => [...posts], [posts]);
+
   const handlePost = useCallback(() => {
     if (!user || !newPost.trim()) return;
 
     const post: Post = {
       id: generateRandomId(),
-      content: newPost,
+      content: newPost.trim(),
       author: user.username,
       authorIcon: user.iconUrl,
       createdAt: new Date(),
       replies: [],
     };
 
-    setPosts(prevPosts => [post, ...prevPosts]);
-    savePosts(channelId, [post, ...posts]);
+    setPosts(prevPosts => {
+      const updatedPosts = [post, ...prevPosts];
+      savePosts(channelId, updatedPosts);
+      return updatedPosts;
+    });
     setNewPost("");
-  }, [user, newPost, channelId, posts, savePosts]);
+  }, [user, newPost, channelId, savePosts]);
 
   const handleEdit = useCallback((postId: string) => {
     const post = posts.find((p) => p.id === postId);
@@ -47,78 +49,89 @@ export const useChannelPosts = (channelId: string) => {
   }, [posts]);
 
   const handleSaveEdit = useCallback((postId: string) => {
-    setPosts(prevPosts => 
-      prevPosts.map(post =>
-        post.id === postId ? { ...post, content: editContent, editedAt: new Date() } : post
-      )
-    );
-    savePosts(channelId, posts.map(post =>
-      post.id === postId ? { ...post, content: editContent, editedAt: new Date() } : post
-    ));
+    if (!editContent.trim()) return;
+    
+    setPosts(prevPosts => {
+      const updatedPosts = prevPosts.map(post =>
+        post.id === postId ? { ...post, content: editContent.trim(), editedAt: new Date() } : post
+      );
+      savePosts(channelId, updatedPosts);
+      return updatedPosts;
+    });
     setEditingPost(null);
     setEditContent("");
-  }, [channelId, editContent, posts, savePosts]);
+  }, [channelId, editContent, savePosts]);
 
   const handleDelete = useCallback((postId: string) => {
-    setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
-    savePosts(channelId, posts.filter(post => post.id !== postId));
-  }, [channelId, posts, savePosts]);
+    setPosts(prevPosts => {
+      const updatedPosts = prevPosts.filter(post => post.id !== postId);
+      savePosts(channelId, updatedPosts);
+      return updatedPosts;
+    });
+  }, [channelId, savePosts]);
 
   const handleReply = useCallback((postId: string) => {
     if (!user || !replyContent.trim()) return;
 
     const reply: Post = {
       id: generateRandomId(),
-      content: replyContent,
+      content: replyContent.trim(),
       author: user.username,
       authorIcon: user.iconUrl,
       createdAt: new Date(),
     };
 
-    setPosts(prevPosts => prevPosts.map(post =>
-      post.id === postId
-        ? { ...post, replies: [...(post.replies || []), reply] }
-        : post
-    ));
-    savePosts(channelId, posts.map(post =>
-      post.id === postId
-        ? { ...post, replies: [...(post.replies || []), reply] }
-        : post
-    ));
+    setPosts(prevPosts => {
+      const updatedPosts = prevPosts.map(post =>
+        post.id === postId
+          ? { ...post, replies: [...(post.replies || []), reply] }
+          : post
+      );
+      savePosts(channelId, updatedPosts);
+      return updatedPosts;
+    });
     setReplyingTo(null);
     setReplyContent("");
-  }, [user, replyContent, channelId, posts, savePosts]);
+  }, [user, replyContent, channelId, savePosts]);
 
   const handleEditReply = useCallback((postId: string, replyId: string, newContent: string) => {
-    setPosts(prevPosts => prevPosts.map(post => {
-      if (post.id === postId && post.replies) {
-        return {
-          ...post,
-          replies: post.replies.map(reply =>
-            reply.id === replyId ? { ...reply, content: newContent, editedAt: new Date() } : reply
-          ),
-        };
-      }
-      return post;
-    }));
-    savePosts(channelId, posts);
-  }, [channelId, posts, savePosts]);
+    if (!newContent.trim()) return;
+
+    setPosts(prevPosts => {
+      const updatedPosts = prevPosts.map(post => {
+        if (post.id === postId && post.replies) {
+          return {
+            ...post,
+            replies: post.replies.map(reply =>
+              reply.id === replyId ? { ...reply, content: newContent.trim(), editedAt: new Date() } : reply
+            ),
+          };
+        }
+        return post;
+      });
+      savePosts(channelId, updatedPosts);
+      return updatedPosts;
+    });
+  }, [channelId, savePosts]);
 
   const handleDeleteReply = useCallback((postId: string, replyId: string) => {
-    setPosts(prevPosts => prevPosts.map(post => {
-      if (post.id === postId && post.replies) {
-        return {
-          ...post,
-          replies: post.replies.filter(reply => reply.id !== replyId),
-        };
-      }
-      return post;
-    }));
-    savePosts(channelId, posts);
-  }, [channelId, posts, savePosts]);
+    setPosts(prevPosts => {
+      const updatedPosts = prevPosts.map(post => {
+        if (post.id === postId && post.replies) {
+          return {
+            ...post,
+            replies: post.replies.filter(reply => reply.id !== replyId),
+          };
+        }
+        return post;
+      });
+      savePosts(channelId, updatedPosts);
+      return updatedPosts;
+    });
+  }, [channelId, savePosts]);
 
   return {
-    posts,
+    posts: sortedPosts,
     newPost,
     editingPost,
     editContent,
