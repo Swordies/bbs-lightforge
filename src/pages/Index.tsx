@@ -1,10 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { PostContainer } from "@/components/bbs/PostContainer";
 import { PostForm } from "@/components/bbs/PostForm";
 import { WelcomeMessage } from "@/components/bbs/WelcomeMessage";
 import { usePosts } from "@/hooks/usePosts";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 interface EditingState {
   postId: string | null;
@@ -18,10 +20,17 @@ interface ReplyingState {
 
 const Index = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { posts, isLoading, error, handleCreatePost, handleEdit, handleDelete, handleReply } = usePosts();
   const [newPost, setNewPost] = useState("");
   const [editing, setEditing] = useState<EditingState>({ postId: null, content: "" });
   const [replying, setReplying] = useState<ReplyingState>({ postId: null, content: "" });
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/auth");
+    }
+  }, [user, navigate]);
 
   const handlePostEdit = async (id: string) => {
     const post = posts.find(p => p.id === id);
@@ -46,6 +55,15 @@ const Index = () => {
       setReplying({ postId: null, content: "" });
     }
   };
+
+  if (!user) {
+    return (
+      <div className="text-center space-y-4">
+        <p>Please log in to view and interact with posts.</p>
+        <Button onClick={() => navigate("/auth")}>Go to Login</Button>
+      </div>
+    );
+  }
 
   if (error) {
     return (
