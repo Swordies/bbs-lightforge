@@ -1,141 +1,51 @@
 
-import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { PostContainer } from "@/components/bbs/PostContainer";
-import { PostForm } from "@/components/bbs/PostForm";
+import { Link } from "react-router-dom";
 
-interface Post {
-  id: string;
-  content: string;
-  author: string;
-  authorIcon?: string;
-  createdAt: Date;
-  replies?: Post[];
-}
-
-const generateRandomId = () => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 15; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+const channels = {
+  "tech": {
+    title: "Technology",
+    description: "Discuss programming, hardware, and all things tech",
+    image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=100&h=100&fit=crop",
+  },
+  "creative": {
+    title: "Creative",
+    description: "Share your art, music, and creative projects",
+    image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=100&h=100&fit=crop",
+  },
+  "random": {
+    title: "Random",
+    description: "General discussion about anything and everything",
+    image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=100&h=100&fit=crop",
+  },
 };
 
 const Index = () => {
-  const { user } = useAuth();
-  const [posts, setPosts] = useState<Post[]>([
-    {
-      id: "xK9nM2pQ5vR8sT3",
-      content: "Welcome to **ASCII BBS**!\n\nThis is a _minimalist_ bulletin board system where you can:\n- Share your thoughts\n- Connect with others\n- Use __text formatting__\n\nFeel free to register and join the conversation!",
-      author: "Admin",
-      authorIcon: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=100&h=100&fit=crop",
-      createdAt: new Date("2024-01-01T12:00:00"),
-      replies: [
-        {
-          id: "hJ4wL7yB9cN6mD1",
-          content: "Thanks for creating this space! The **retro aesthetic** brings back _memories_ of the __early internet__ days.",
-          author: "RetroFan",
-          authorIcon: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=100&h=100&fit=crop",
-          createdAt: new Date("2024-01-01T12:30:00"),
-        },
-      ],
-    },
-  ]);
-  const [newPost, setNewPost] = useState("");
-  const [editingPost, setEditingPost] = useState<string | null>(null);
-  const [editContent, setEditContent] = useState("");
-  const [replyingTo, setReplyingTo] = useState<string | null>(null);
-  const [replyContent, setReplyContent] = useState("");
-
-  const handlePost = () => {
-    if (!user || !newPost.trim()) return;
-
-    const post: Post = {
-      id: generateRandomId(),
-      content: newPost,
-      author: user.username,
-      authorIcon: user.iconUrl,
-      createdAt: new Date(),
-      replies: [],
-    };
-
-    setPosts([post, ...posts]);
-    setNewPost("");
-  };
-
-  const handleEdit = (postId: string) => {
-    const post = posts.find((p) => p.id === postId);
-    if (post) {
-      setEditingPost(postId);
-      setEditContent(post.content);
-    }
-  };
-
-  const handleSaveEdit = (postId: string) => {
-    setPosts(
-      posts.map((post) =>
-        post.id === postId ? { ...post, content: editContent } : post
-      )
-    );
-    setEditingPost(null);
-    setEditContent("");
-  };
-
-  const handleDelete = (postId: string) => {
-    setPosts(posts.filter((post) => post.id !== postId));
-  };
-
-  const handleReply = (postId: string) => {
-    if (!user || !replyContent.trim()) return;
-
-    const reply: Post = {
-      id: generateRandomId(),
-      content: replyContent,
-      author: user.username,
-      authorIcon: user.iconUrl,
-      createdAt: new Date(),
-    };
-
-    setPosts(
-      posts.map((post) =>
-        post.id === postId
-          ? { ...post, replies: [...(post.replies || []), reply] }
-          : post
-      )
-    );
-    setReplyingTo(null);
-    setReplyContent("");
-  };
-
   return (
-    <div className="space-y-4 max-w-5xl mx-auto px-2">
-      {user && (
-        <PostForm
-          newPost={newPost}
-          setNewPost={setNewPost}
-          handlePost={handlePost}
-        />
-      )}
+    <div className="max-w-5xl mx-auto px-2">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold mb-4">Welcome to ASCII BBS</h1>
+        <p className="text-muted-foreground">Choose a channel to start discussing</p>
+      </div>
 
-      <div className="space-y-6">
-        {posts.map((post) => (
-          <PostContainer
-            key={post.id}
-            post={post}
-            user={user}
-            editingPost={editingPost}
-            editContent={editContent}
-            replyingTo={replyingTo}
-            replyContent={replyContent}
-            setEditContent={setEditContent}
-            setReplyContent={setReplyContent}
-            setReplyingTo={setReplyingTo}
-            handleEdit={handleEdit}
-            handleDelete={handleDelete}
-            handleSaveEdit={handleSaveEdit}
-            handleReply={handleReply}
-          />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Object.entries(channels).map(([id, channel]) => (
+          <Link
+            key={id}
+            to={`/channel/${id}`}
+            className="block border-2 border-primary/50 p-4 hover:bg-accent transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <img
+                src={channel.image}
+                alt={channel.title}
+                className="w-16 h-16 object-cover border border-primary/50"
+              />
+              <div>
+                <h2 className="text-xl font-bold">{channel.title}</h2>
+                <p className="text-muted-foreground text-sm">{channel.description}</p>
+              </div>
+            </div>
+          </Link>
         ))}
       </div>
     </div>
@@ -143,4 +53,3 @@ const Index = () => {
 };
 
 export default Index;
-

@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/Header";
 import Index from "./pages/Index";
+import Channel from "./pages/Channel";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -17,6 +18,7 @@ const App = () => (
         <main className="container mx-auto px-4 pt-24 pb-12">
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/channel/:channelId" element={<Channel />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
