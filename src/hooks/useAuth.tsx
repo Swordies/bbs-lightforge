@@ -16,38 +16,47 @@ interface AuthState {
   updateIcon: (iconUrl: string) => Promise<void>;
 }
 
-// Load initial user state from cookies
+const COOKIE_KEY = 'user';
+const COOKIE_EXPIRES = 30; // days
+
+// Memoized initial user state from cookies
 const getInitialUser = (): User | null => {
-  const userCookie = Cookies.get('user');
-  return userCookie ? JSON.parse(userCookie) : null;
+  try {
+    const userCookie = Cookies.get(COOKIE_KEY);
+    return userCookie ? JSON.parse(userCookie) : null;
+  } catch {
+    // If cookie parsing fails, remove corrupted cookie and return null
+    Cookies.remove(COOKIE_KEY);
+    return null;
+  }
 };
 
 export const useAuth = create<AuthState>((set) => ({
   user: getInitialUser(),
+  
   login: async (username: string, password: string) => {
-    const user = { id: "1", username };
-    // Store user data in cookie, expires in 30 days
-    Cookies.set('user', JSON.stringify(user), { expires: 30 });
+    const user: User = { id: "1", username };
+    Cookies.set(COOKIE_KEY, JSON.stringify(user), { expires: COOKIE_EXPIRES });
     set({ user });
   },
+  
   register: async (username: string, password: string) => {
-    const user = { id: "1", username };
-    // Store user data in cookie, expires in 30 days
-    Cookies.set('user', JSON.stringify(user), { expires: 30 });
+    const user: User = { id: "1", username };
+    Cookies.set(COOKIE_KEY, JSON.stringify(user), { expires: COOKIE_EXPIRES });
     set({ user });
   },
+  
   logout: () => {
-    // Remove user cookie on logout
-    Cookies.remove('user');
+    Cookies.remove(COOKIE_KEY);
     set({ user: null });
   },
+  
   updateIcon: async (iconUrl: string) => {
     set((state) => {
-      const updatedUser = state.user ? { ...state.user, iconUrl } : null;
-      // Update cookie with new icon URL
-      if (updatedUser) {
-        Cookies.set('user', JSON.stringify(updatedUser), { expires: 30 });
-      }
+      if (!state.user) return state;
+      
+      const updatedUser = { ...state.user, iconUrl };
+      Cookies.set(COOKIE_KEY, JSON.stringify(updatedUser), { expires: COOKIE_EXPIRES });
       return { user: updatedUser };
     });
   }
