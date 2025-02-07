@@ -51,28 +51,10 @@ const generateRandomId = () => {
 
 const Channel = () => {
   const { channelId } = useParams();
-  const { user } = useAuth();
+  const { user, getChannelPosts, savePosts } = useAuth();
   const channel = channels[channelId as keyof typeof channels];
   
-  const [posts, setPosts] = useState<Post[]>([
-    {
-      id: "welcome",
-      content: "Welcome to Lightforge BBS! Feel free to start a discussion or share your thoughts.",
-      author: "Admin",
-      authorIcon: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=100&h=100&fit=crop",
-      createdAt: new Date(),
-      replies: [
-        {
-          id: "welcome-reply",
-          content: "Thanks for having me here! Looking forward to great discussions.",
-          author: "User",
-          authorIcon: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=100&h=100&fit=crop",
-          createdAt: new Date(),
-        }
-      ],
-    }
-  ]);
-  
+  const [posts, setPosts] = useState<Post[]>(getChannelPosts(channelId || ''));
   const [newPost, setNewPost] = useState("");
   const [editingPost, setEditingPost] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
@@ -95,7 +77,9 @@ const Channel = () => {
       replies: [],
     };
 
-    setPosts([post, ...posts]);
+    const updatedPosts = [post, ...posts];
+    setPosts(updatedPosts);
+    savePosts(channelId || '', updatedPosts);
     setNewPost("");
   };
 
@@ -108,17 +92,19 @@ const Channel = () => {
   };
 
   const handleSaveEdit = (postId: string) => {
-    setPosts(
-      posts.map((post) =>
-        post.id === postId ? { ...post, content: editContent } : post
-      )
+    const updatedPosts = posts.map((post) =>
+      post.id === postId ? { ...post, content: editContent } : post
     );
+    setPosts(updatedPosts);
+    savePosts(channelId || '', updatedPosts);
     setEditingPost(null);
     setEditContent("");
   };
 
   const handleDelete = (postId: string) => {
-    setPosts(posts.filter((post) => post.id !== postId));
+    const updatedPosts = posts.filter((post) => post.id !== postId);
+    setPosts(updatedPosts);
+    savePosts(channelId || '', updatedPosts);
   };
 
   const handleReply = (postId: string) => {
@@ -132,13 +118,13 @@ const Channel = () => {
       createdAt: new Date(),
     };
 
-    setPosts(
-      posts.map((post) =>
-        post.id === postId
-          ? { ...post, replies: [...(post.replies || []), reply] }
-          : post
-      )
+    const updatedPosts = posts.map((post) =>
+      post.id === postId
+        ? { ...post, replies: [...(post.replies || []), reply] }
+        : post
     );
+    setPosts(updatedPosts);
+    savePosts(channelId || '', updatedPosts);
     setReplyingTo(null);
     setReplyContent("");
   };
