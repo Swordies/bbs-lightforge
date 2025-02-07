@@ -12,8 +12,9 @@ interface ReplyProps {
     author: string;
     authorIcon?: string;
     createdAt: Date;
+    editedAt?: Date;
   };
-  user: { username: string } | null;
+  user: { username: string; usernameBoxColor?: string; } | null;
   postId: string;
   onEdit: (postId: string, replyId: string, newContent: string) => void;
   onDelete: (postId: string, replyId: string) => void;
@@ -57,7 +58,13 @@ export const Reply = ({ reply, user, postId, onEdit, onDelete }: ReplyProps) => 
           ) : (
             <MessageSquare className="w-[100px] h-[100px]" />
           )}
-          <div className="text-sm mt-2 text-center font-bold px-2 py-1 border border-primary/50">
+          <div 
+            className="text-sm mt-2 text-center font-bold px-2 py-1 border border-primary/50"
+            style={{
+              backgroundColor: user?.username === reply.author && user?.usernameBoxColor ? user.usernameBoxColor : '#1A1F2C',
+              color: user?.username === reply.author && user?.usernameBoxColor ? getContrastColor(user.usernameBoxColor) : '#ffffff'
+            }}
+          >
             {reply.author}
           </div>
         </div>
@@ -66,6 +73,11 @@ export const Reply = ({ reply, user, postId, onEdit, onDelete }: ReplyProps) => 
           <div className="speech-bubble speech-bubble-right">
             <div className="text-sm text-muted-foreground border border-primary/20 px-2 mb-4 inline-block">
               {reply.createdAt.toLocaleString()}
+              {reply.editedAt && (
+                <span className="ml-2 text-muted-foreground/70">
+                  (edited {reply.editedAt.toLocaleString()})
+                </span>
+              )}
             </div>
             
             {isEditing ? (

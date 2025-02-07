@@ -1,16 +1,31 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "./ui/button";
-import { UserCircle, ImagePlus } from "lucide-react";
+import { UserCircle, ImagePlus, Palette } from "lucide-react";
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { useToast } from "./ui/use-toast";
 import { Link } from "react-router-dom";
 
+const getContrastColor = (hexColor: string) => {
+  // Convert hex to RGB
+  const r = parseInt(hexColor.slice(1, 3), 16);
+  const g = parseInt(hexColor.slice(3, 5), 16);
+  const b = parseInt(hexColor.slice(5, 7), 16);
+  
+  // Calculate relative luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  
+  // Return black or white based on luminance
+  return luminance > 0.5 ? '#000000' : '#ffffff';
+};
+
 export const Header = () => {
-  const { user, logout, updateIcon } = useAuth();
+  const { user, logout, updateIcon, updateUsernameBoxColor } = useAuth();
   const [showIconInput, setShowIconInput] = useState(false);
+  const [showColorInput, setShowColorInput] = useState(false);
   const [iconUrl, setIconUrl] = useState("");
+  const [usernameBoxColor, setUsernameBoxColor] = useState("#1A1F2C");
   const { toast } = useToast();
 
   const handleUpdateIcon = async () => {
@@ -28,6 +43,32 @@ export const Header = () => {
       toast({
         title: "Error",
         description: "Failed to update icon",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateColor = async () => {
+    if (!usernameBoxColor.match(/^#[0-9A-Fa-f]{6}$/)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid hex color (e.g., #FF0000)",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      await updateUsernameBoxColor(usernameBoxColor);
+      setShowColorInput(false);
+      toast({
+        title: "Success",
+        description: "Your username box color has been updated",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update username box color",
         variant: "destructive",
       });
     }
@@ -51,12 +92,23 @@ export const Header = () => {
                   ) : (
                     <UserCircle className="w-8 h-8" />
                   )}
-                  <span className="px-2 py-1 border border-primary/50">
+                  <span 
+                    className="px-2 py-1 border border-primary/50"
+                    style={{
+                      backgroundColor: user.usernameBoxColor || '#1A1F2C',
+                      color: user.usernameBoxColor ? getContrastColor(user.usernameBoxColor) : '#ffffff'
+                    }}
+                  >
                     {user.username}
                   </span>
-                  <Button variant="ghost" size="icon" onClick={() => setShowIconInput(!showIconInput)}>
-                    <ImagePlus className="w-4 h-4" />
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" onClick={() => setShowIconInput(!showIconInput)}>
+                      <ImagePlus className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => setShowColorInput(!showColorInput)}>
+                      <Palette className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
                 {showIconInput && (
                   <div className="flex items-center gap-2">
@@ -70,6 +122,18 @@ export const Header = () => {
                     <Button onClick={handleUpdateIcon} className="bbs-button">Update</Button>
                   </div>
                 )}
+                {showColorInput && (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="text"
+                      placeholder="Enter hex color (e.g., #FF0000)"
+                      value={usernameBoxColor}
+                      onChange={(e) => setUsernameBoxColor(e.target.value)}
+                      className="w-64 bbs-input"
+                    />
+                    <Button onClick={handleUpdateColor} className="bbs-button">Update</Button>
+                  </div>
+                )}
                 <Button onClick={logout} variant="ghost" className="bbs-button">Logout</Button>
               </div>
             ) : (
@@ -81,3 +145,4 @@ export const Header = () => {
     </header>
   );
 };
+
