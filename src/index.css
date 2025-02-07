@@ -111,3 +111,20 @@
   z-index: 1;
 }
 
+.speech-bubble-right {
+  @apply ml-0 mr-6;
+}
+
+.speech-bubble-right::before {
+  left: auto;
+  right: -12px;
+  border-width: 10px 0 10px 12px;
+  border-color: transparent transparent transparent hsl(var(--primary) / 0.5);
+}
+
+.speech-bubble-right::after {
+  left: auto;
+  right: -9px;
+  border-width: 10px 0 10px 12px;
+  border-color: transparent transparent transparent hsl(var(--background));
+}
