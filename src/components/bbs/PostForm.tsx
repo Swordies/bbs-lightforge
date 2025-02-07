@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Bold, Italic, List, Strikethrough } from "lucide-react";
+import { Bold, Italic, Underline, List, Strikethrough } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 interface PostFormProps {
@@ -11,7 +11,7 @@ interface PostFormProps {
   isEditing?: boolean;
 }
 
-type FormatType = 'bold' | 'italic' | 'list' | 'strikethrough';
+type FormatType = 'bold' | 'italic' | 'underline' | 'list' | 'strikethrough';
 
 export const PostForm = ({ newPost, setNewPost, handlePost, isEditing }: PostFormProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -19,6 +19,7 @@ export const PostForm = ({ newPost, setNewPost, handlePost, isEditing }: PostFor
   const [formatPositions, setFormatPositions] = useState<Record<FormatType, number>>({
     bold: -1,
     italic: -1,
+    underline: -1,
     list: -1,
     strikethrough: -1
   });
@@ -36,6 +37,10 @@ export const PostForm = ({ newPost, setNewPost, handlePost, isEditing }: PostFor
         case 'i':
           e.preventDefault();
           formatType = 'italic';
+          break;
+        case 'u':
+          e.preventDefault();
+          formatType = 'underline';
           break;
         case '-':
           e.preventDefault();
@@ -59,6 +64,8 @@ export const PostForm = ({ newPost, setNewPost, handlePost, isEditing }: PostFor
         return { opening: '**', closing: '**' };
       case 'italic':
         return { opening: '_', closing: '_' };
+      case 'underline':
+        return { opening: '__', closing: '__' };
       case 'strikethrough':
         return { opening: '~~', closing: '~~' };
       case 'list':
@@ -132,6 +139,15 @@ export const PostForm = ({ newPost, setNewPost, handlePost, isEditing }: PostFor
           <Italic className="h-4 w-4" />
         </Button>
         <Button 
+          variant={activeFormats.includes('underline') ? "default" : "outline"}
+          size="icon"
+          onClick={() => formatText('underline')}
+          className={`bbs-button ${activeFormats.includes('underline') ? 'bg-[#1A1F2C] text-white' : ''}`}
+          title="Underline (Ctrl+U)"
+        >
+          <Underline className="h-4 w-4" />
+        </Button>
+        <Button 
           variant={activeFormats.includes('strikethrough') ? "default" : "outline"}
           size="icon"
           onClick={() => formatText('strikethrough')}
@@ -154,7 +170,7 @@ export const PostForm = ({ newPost, setNewPost, handlePost, isEditing }: PostFor
         ref={textareaRef}
         placeholder={isEditing 
           ? "Edit your post..." 
-          : "What's on your mind? Use Ctrl+B for bold, Ctrl+I for italic, Ctrl+S for strikethrough"}
+          : "What's on your mind? Use Ctrl+B for bold, Ctrl+I for italic, Ctrl+U for underline, Ctrl+S for strikethrough"}
         value={newPost}
         onChange={(e) => setNewPost(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -166,3 +182,4 @@ export const PostForm = ({ newPost, setNewPost, handlePost, isEditing }: PostFor
     </div>
   );
 };
+
