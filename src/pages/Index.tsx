@@ -1,54 +1,112 @@
 
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { PostContainer } from "@/components/bbs/PostContainer";
+import { Post } from "@/components/bbs/Post";
 import { PostForm } from "@/components/bbs/PostForm";
-import { WelcomeMessage } from "@/components/bbs/WelcomeMessage";
-import { usePosts } from "@/hooks/usePosts";
+
+interface Post {
+  id: string;
+  content: string;
+  author: string;
+  authorIcon?: string;
+  createdAt: Date;
+  replies?: Post[];
+}
+
+const generateRandomId = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 15; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
 
 const Index = () => {
   const { user } = useAuth();
-  const { posts, isLoading, error, handleCreatePost, handleEdit, handleDelete, handleReply } = usePosts();
+  const [posts, setPosts] = useState<Post[]>([
+    {
+      id: "xK9nM2pQ5vR8sT3",
+      content: "Welcome to ASCII BBS! This is a minimalist bulletin board system where you can share your thoughts and connect with others. Feel free to register and join the conversation!",
+      author: "Admin",
+      authorIcon: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=100&h=100&fit=crop",
+      createdAt: new Date("2024-01-01T12:00:00"),
+      replies: [
+        {
+          id: "hJ4wL7yB9cN6mD1",
+          content: "Thanks for creating this space! The retro aesthetic brings back memories of the early internet days.",
+          author: "RetroFan",
+          authorIcon: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=100&h=100&fit=crop",
+          createdAt: new Date("2024-01-01T12:30:00"),
+        },
+      ],
+    },
+  ]);
   const [newPost, setNewPost] = useState("");
   const [editingPost, setEditingPost] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
 
-  const handlePostEdit = async (id: string) => {
-    const post = posts.find(p => p.id === id);
+  const handlePost = () => {
+    if (!user || !newPost.trim()) return;
+
+    const post: Post = {
+      id: generateRandomId(),
+      content: newPost,
+      author: user.username,
+      authorIcon: user.iconUrl,
+      createdAt: new Date(),
+      replies: [],
+    };
+
+    setPosts([post, ...posts]);
+    setNewPost("");
+  };
+
+  const handleEdit = (postId: string) => {
+    const post = posts.find((p) => p.id === postId);
     if (post) {
-      setEditingPost(id);
+      setEditingPost(postId);
       setEditContent(post.content);
     }
   };
 
-  const handleSaveEdit = async (id: string) => {
-    if (await handleEdit(id, editContent)) {
-      setEditingPost(null);
-      setEditContent("");
-    }
-  };
-
-  const handlePostReply = async (postId: string) => {
-    if (!user) return;
-    if (await handleReply(postId, replyContent, user.id)) {
-      setReplyingTo(null);
-      setReplyContent("");
-    }
-  };
-
-  if (error) {
-    return (
-      <div className="text-center text-red-500">
-        Error loading posts: {error instanceof Error ? error.message : "Unknown error"}
-      </div>
+  const handleSaveEdit = (postId: string) => {
+    setPosts(
+      posts.map((post) =>
+        post.id === postId ? { ...post, content: editContent } : post
+      )
     );
-  }
+    setEditingPost(null);
+    setEditContent("");
+  };
 
-  if (isLoading) {
-    return <div className="text-center animate-pulse">Loading posts...</div>;
-  }
+  const handleDelete = (postId: string) => {
+    setPosts(posts.filter((post) => post.id !== postId));
+  };
+
+  const handleReply = (postId: string) => {
+    if (!user || !replyContent.trim()) return;
+
+    const reply: Post = {
+      id: generateRandomId(),
+      content: replyContent,
+      author: user.username,
+      authorIcon: user.iconUrl,
+      createdAt: new Date(),
+    };
+
+    setPosts(
+      posts.map((post) =>
+        post.id === postId
+          ? { ...post, replies: [...(post.replies || []), reply] }
+          : post
+      )
+    );
+    setReplyingTo(null);
+    setReplyContent("");
+  };
 
   return (
     <div className="space-y-4 max-w-5xl mx-auto px-2">
@@ -56,48 +114,29 @@ const Index = () => {
         <PostForm
           newPost={newPost}
           setNewPost={setNewPost}
-          handlePost={async () => {
-            if (await handleCreatePost(newPost, user.id)) {
-              setNewPost("");
-            }
-          }}
+          handlePost={handlePost}
         />
       )}
 
       <div className="space-y-6">
-        {posts.length === 0 ? (
-          <WelcomeMessage />
-        ) : (
-          posts.map((post) => (
-            <PostContainer
-              key={post.id}
-              post={{
-                ...post,
-                author: post.author.username,
-                authorIcon: post.author.icon_url,
-                createdAt: new Date(post.created_at),
-                replies: post.replies?.map(reply => ({
-                  ...reply,
-                  author: reply.author.username,
-                  authorIcon: reply.author.icon_url,
-                  createdAt: new Date(reply.created_at)
-                }))
-              }}
-              user={user}
-              editingPost={editingPost}
-              editContent={editContent}
-              replyingTo={replyingTo}
-              replyContent={replyContent}
-              setEditContent={setEditContent}
-              setReplyContent={setReplyContent}
-              setReplyingTo={setReplyingTo}
-              handleEdit={handlePostEdit}
-              handleDelete={handleDelete}
-              handleSaveEdit={handleSaveEdit}
-              handleReply={handlePostReply}
-            />
-          ))
-        )}
+        {posts.map((post) => (
+          <Post
+            key={post.id}
+            post={post}
+            user={user}
+            editingPost={editingPost}
+            editContent={editContent}
+            replyingTo={replyingTo}
+            replyContent={replyContent}
+            setEditContent={setEditContent}
+            setReplyContent={setReplyContent}
+            setReplyingTo={setReplyingTo}
+            handleEdit={handleEdit}
+            handleDelete={handleDelete}
+            handleSaveEdit={handleSaveEdit}
+            handleReply={handleReply}
+          />
+        ))}
       </div>
     </div>
   );
