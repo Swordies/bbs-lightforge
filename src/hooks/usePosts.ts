@@ -29,7 +29,9 @@ const fetchPosts = async (): Promise<Post[]> => {
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data || [];
+  
+  // Ensure we always return an array
+  return data ?? [];
 };
 
 export const usePosts = () => {
@@ -40,6 +42,7 @@ export const usePosts = () => {
     queryKey: ['posts'],
     queryFn: fetchPosts,
     meta: {
+      errorBoundary: true,
       onError: (error: Error) => {
         toast({
           title: "Error loading posts",
@@ -50,11 +53,20 @@ export const usePosts = () => {
     }
   });
 
-  const handleCreatePost = async (content: string, userId: string) => {
+  const handleCreatePost = async (content: string, userId: string): Promise<boolean> => {
+    if (!content.trim()) {
+      toast({
+        title: "Error creating post",
+        description: "Post content cannot be empty",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     const { error } = await supabase
       .from('posts')
       .insert({
-        content,
+        content: content.trim(),
         author_id: userId
       });
 
@@ -75,10 +87,19 @@ export const usePosts = () => {
     return true;
   };
 
-  const handleEdit = async (id: string, content: string) => {
+  const handleEdit = async (id: string, content: string): Promise<boolean> => {
+    if (!content.trim()) {
+      toast({
+        title: "Error updating post",
+        description: "Post content cannot be empty",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     const { error } = await supabase
       .from('posts')
-      .update({ content })
+      .update({ content: content.trim() })
       .eq('id', id);
 
     if (error) {
@@ -98,7 +119,7 @@ export const usePosts = () => {
     return true;
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string): Promise<boolean> => {
     const { error } = await supabase
       .from('posts')
       .delete()
@@ -121,11 +142,20 @@ export const usePosts = () => {
     return true;
   };
 
-  const handleReply = async (postId: string, content: string, userId: string) => {
+  const handleReply = async (postId: string, content: string, userId: string): Promise<boolean> => {
+    if (!content.trim()) {
+      toast({
+        title: "Error posting reply",
+        description: "Reply content cannot be empty",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     const { error } = await supabase
       .from('replies')
       .insert({
-        content,
+        content: content.trim(),
         post_id: postId,
         author_id: userId
       });

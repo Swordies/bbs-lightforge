@@ -31,6 +31,8 @@ const Index = () => {
   };
 
   const handleSaveEdit = async (id: string) => {
+    if (editing.content.trim().length === 0) return;
+    
     if (await handleEdit(id, editing.content)) {
       setEditing({ postId: null, content: "" });
     }
@@ -38,6 +40,8 @@ const Index = () => {
 
   const handlePostReply = async (postId: string) => {
     if (!user) return;
+    if (replying.content.trim().length === 0) return;
+    
     if (await handleReply(postId, replying.content, user.id)) {
       setReplying({ postId: null, content: "" });
     }
@@ -46,7 +50,7 @@ const Index = () => {
   if (error) {
     return (
       <div className="text-center text-red-500">
-        {error instanceof Error ? error.message : "Unknown error"}
+        {error instanceof Error ? error.message : "An error occurred while loading posts"}
       </div>
     );
   }
@@ -62,6 +66,8 @@ const Index = () => {
           newPost={newPost}
           setNewPost={setNewPost}
           handlePost={async () => {
+            if (newPost.trim().length === 0) return;
+            
             if (await handleCreatePost(newPost, user.id)) {
               setNewPost("");
             }
