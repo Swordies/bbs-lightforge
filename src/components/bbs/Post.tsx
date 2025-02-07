@@ -74,7 +74,7 @@ export const Post = ({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-8">
       <div className="bbs-card fade-in">
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0">
@@ -82,10 +82,10 @@ export const Post = ({
               <img
                 src={post.authorIcon}
                 alt={post.author}
-                className="w-[100px] h-[100px] rounded-none border border-primary/50 object-cover"
+                className="w-12 h-12 rounded-none border border-primary/50 object-cover"
               />
             ) : (
-              <MessageSquare className="w-[100px] h-[100px]" />
+              <MessageSquare className="w-12 h-12" />
             )}
             <div className="text-sm mt-2 text-center font-bold px-2 py-1 border border-primary/50">
               {post.author}
@@ -167,7 +167,7 @@ export const Post = ({
       </div>
 
       {post.replies && post.replies.length > 0 && (
-        <div className="pl-8 space-y-2">
+        <div className="pl-8 space-y-6 border-l-2 border-primary/20">
           {post.replies.map((reply) => (
             <Reply key={reply.id} reply={reply} />
           ))}
