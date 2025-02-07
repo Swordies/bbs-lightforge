@@ -27,14 +27,14 @@ const Index = () => {
   const [posts, setPosts] = useState<Post[]>([
     {
       id: "xK9nM2pQ5vR8sT3",
-      content: "Welcome to ASCII BBS! This is a minimalist bulletin board system where you can share your thoughts and connect with others. Feel free to register and join the conversation!",
+      content: "Welcome to **ASCII BBS**!\n\nThis is a _minimalist_ bulletin board system where you can:\n- Share your thoughts\n- Connect with others\n- Use __text formatting__\n\nFeel free to register and join the conversation!",
       author: "Admin",
       authorIcon: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=100&h=100&fit=crop",
       createdAt: new Date("2024-01-01T12:00:00"),
       replies: [
         {
           id: "hJ4wL7yB9cN6mD1",
-          content: "Thanks for creating this space! The retro aesthetic brings back memories of the early internet days.",
+          content: "Thanks for creating this space! The **retro aesthetic** brings back _memories_ of the __early internet__ days.",
           author: "RetroFan",
           authorIcon: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=100&h=100&fit=crop",
           createdAt: new Date("2024-01-01T12:30:00"),
