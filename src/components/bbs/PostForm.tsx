@@ -17,9 +17,10 @@ export const PostForm = ({ newPost, setNewPost, handlePost }: PostFormProps) => 
         onChange={(e) => setNewPost(e.target.value)}
         className="bbs-input w-full mb-4"
       />
-      <Button onClick={handlePost} className="bbs-button">
+      <Button onClick={handlePost} className="bbs-button hover:bg-[#1A1F2C] hover:text-white">
         Post
       </Button>
     </div>
   );
 };
+
