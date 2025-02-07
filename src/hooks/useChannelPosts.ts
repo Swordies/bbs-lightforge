@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Post } from "@/types/channel";
 import { useAuth } from "@/hooks/useAuth";
@@ -90,7 +91,7 @@ export const useChannelPosts = (channelId: string) => {
         return {
           ...post,
           replies: post.replies.map((reply) =>
-            reply.id === replyId ? { ...reply, content: newContent } : reply
+            reply.id === replyId ? { ...reply, content: newContent, editedAt: new Date() } : reply
           ),
         };
       }

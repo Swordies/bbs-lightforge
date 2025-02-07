@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { MessageSquare, Edit2, Trash2 } from "lucide-react";
 import { formatText } from "@/lib/formatText";
@@ -71,11 +72,13 @@ export const Reply = ({ reply, user, postId, onEdit, onDelete }: ReplyProps) => 
         
         <div className="flex-1">
           <div className="speech-bubble speech-bubble-right">
-            <div className="text-sm text-muted-foreground border border-primary/20 px-2 mb-4 inline-block">
-              {reply.createdAt.toLocaleString()}
+            <div className="text-sm text-muted-foreground">
+              <span className="border border-primary/20 px-2 inline-block">
+                {reply.createdAt.toLocaleString()}
+              </span>
               {reply.editedAt && (
-                <span className="ml-2 text-muted-foreground/70">
-                  (edited {reply.editedAt.toLocaleString()})
+                <span className="ml-2 border border-primary/20 px-2 inline-block">
+                  Edited on {reply.editedAt.toLocaleString()}
                 </span>
               )}
             </div>
