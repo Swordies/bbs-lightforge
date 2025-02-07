@@ -72,7 +72,7 @@ export const PostContent = ({
           />
         ) : (
           <div 
-            className="mb-4 [&_strong]:font-bold [&_em]:italic [&_u]:underline [&_s]:line-through [&_br]:block [&_u]:border-b [&_u]:border-current"
+            className="mb-4 [&_strong]:font-bold [&_em]:italic [&_u]:border-b-2 [&_s]:line-through [&_br]:block"
             dangerouslySetInnerHTML={{ 
               __html: formatText(post.content) 
             }} 
