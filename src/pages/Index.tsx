@@ -1,67 +1,72 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { PostContainer } from "@/components/bbs/PostContainer";
 import { PostForm } from "@/components/bbs/PostForm";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface Post {
   id: string;
   content: string;
-  author: string;
-  authorIcon?: string;
-  createdAt: Date;
+  author: {
+    username: string;
+    icon_url?: string;
+  };
+  author_id: string;
+  created_at: string;
   replies?: Post[];
 }
 
-const generateRandomId = () => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 15; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+const fetchPosts = async () => {
+  const { data, error } = await supabase
+    .from('posts')
+    .select(`
+      *,
+      author:profiles!posts_author_id_fkey(username, icon_url),
+      replies:replies(
+        *,
+        author:profiles!replies_author_id_fkey(username, icon_url)
+      )
+    `)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
 };
 
 const Index = () => {
   const { user } = useAuth();
-  const [posts, setPosts] = useState<Post[]>([
-    {
-      id: "xK9nM2pQ5vR8sT3",
-      content: "Welcome to **ASCII BBS**!\n\nThis is a _minimalist_ bulletin board system where you can:\n- Share your thoughts\n- Connect with others\n- Use __text formatting__\n\nFeel free to register and join the conversation!",
-      author: "Admin",
-      authorIcon: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=100&h=100&fit=crop",
-      createdAt: new Date("2024-01-01T12:00:00"),
-      replies: [
-        {
-          id: "hJ4wL7yB9cN6mD1",
-          content: "Thanks for creating this space! The **retro aesthetic** brings back _memories_ of the __early internet__ days.",
-          author: "RetroFan",
-          authorIcon: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=100&h=100&fit=crop",
-          createdAt: new Date("2024-01-01T12:30:00"),
-        },
-      ],
-    },
-  ]);
   const [newPost, setNewPost] = useState("");
   const [editingPost, setEditingPost] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
+  const queryClient = useQueryClient();
 
-  const handlePost = () => {
+  const { data: posts = [], isLoading } = useQuery({
+    queryKey: ['posts'],
+    queryFn: fetchPosts
+  });
+
+  const handlePost = async () => {
     if (!user || !newPost.trim()) return;
 
-    const post: Post = {
-      id: generateRandomId(),
-      content: newPost,
-      author: user.username,
-      authorIcon: user.iconUrl,
-      createdAt: new Date(),
-      replies: [],
-    };
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .insert({
+          content: newPost,
+          author_id: user.id
+        });
 
-    setPosts([post, ...posts]);
-    setNewPost("");
+      if (error) throw error;
+
+      setNewPost("");
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    } catch (error) {
+      console.error('Error creating post:', error);
+    }
   };
 
   const handleEdit = (postId: string) => {
@@ -72,41 +77,69 @@ const Index = () => {
     }
   };
 
-  const handleSaveEdit = (postId: string) => {
-    setPosts(
-      posts.map((post) =>
-        post.id === postId ? { ...post, content: editContent } : post
-      )
-    );
-    setEditingPost(null);
-    setEditContent("");
+  const handleSaveEdit = async (postId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .update({ content: editContent })
+        .eq('id', postId)
+        .eq('author_id', user.id);
+
+      if (error) throw error;
+
+      setEditingPost(null);
+      setEditContent("");
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    } catch (error) {
+      console.error('Error updating post:', error);
+    }
   };
 
-  const handleDelete = (postId: string) => {
-    setPosts(posts.filter((post) => post.id !== postId));
+  const handleDelete = async (postId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', postId)
+        .eq('author_id', user.id);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    } catch (error) {
+      console.error('Error deleting post:', error);
+    }
   };
 
-  const handleReply = (postId: string) => {
+  const handleReply = async (postId: string) => {
     if (!user || !replyContent.trim()) return;
 
-    const reply: Post = {
-      id: generateRandomId(),
-      content: replyContent,
-      author: user.username,
-      authorIcon: user.iconUrl,
-      createdAt: new Date(),
-    };
+    try {
+      const { error } = await supabase
+        .from('replies')
+        .insert({
+          content: replyContent,
+          author_id: user.id,
+          post_id: postId
+        });
 
-    setPosts(
-      posts.map((post) =>
-        post.id === postId
-          ? { ...post, replies: [...(post.replies || []), reply] }
-          : post
-      )
-    );
-    setReplyingTo(null);
-    setReplyContent("");
+      if (error) throw error;
+
+      setReplyingTo(null);
+      setReplyContent("");
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    } catch (error) {
+      console.error('Error creating reply:', error);
+    }
   };
+
+  if (isLoading) {
+    return <div className="text-center">Loading posts...</div>;
+  }
 
   return (
     <div className="space-y-4 max-w-5xl mx-auto px-2">
@@ -122,7 +155,18 @@ const Index = () => {
         {posts.map((post) => (
           <PostContainer
             key={post.id}
-            post={post}
+            post={{
+              ...post,
+              author: post.author.username,
+              authorIcon: post.author.icon_url,
+              createdAt: new Date(post.created_at),
+              replies: post.replies?.map(reply => ({
+                ...reply,
+                author: reply.author.username,
+                authorIcon: reply.author.icon_url,
+                createdAt: new Date(reply.created_at)
+              }))
+            }}
             user={user}
             editingPost={editingPost}
             editContent={editContent}
@@ -143,4 +187,3 @@ const Index = () => {
 };
 
 export default Index;
-
