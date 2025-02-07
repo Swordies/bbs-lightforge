@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Post } from "@/components/bbs/Post";
+import { PostContainer } from "@/components/bbs/PostContainer";
 import { PostForm } from "@/components/bbs/PostForm";
 
 interface Post {
@@ -120,7 +120,7 @@ const Index = () => {
 
       <div className="space-y-6">
         {posts.map((post) => (
-          <Post
+          <PostContainer
             key={post.id}
             post={post}
             user={user}
@@ -143,3 +143,4 @@ const Index = () => {
 };
 
 export default Index;
+
