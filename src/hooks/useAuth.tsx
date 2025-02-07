@@ -22,7 +22,7 @@ export const useAuth = create<AuthState>((set) => ({
 
   login: async (username: string, password: string) => {
     // For login, we'll use username as the email with a fake domain
-    const email = `${username}@ascii-bbs.local`;
+    const email = `${username.toLowerCase()}@ascii-bbs.local`;
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -50,8 +50,19 @@ export const useAuth = create<AuthState>((set) => ({
   },
 
   register: async (username: string, password: string) => {
+    // Check if username already exists
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('username', username)
+      .single();
+
+    if (existingProfile) {
+      throw new Error('Username already taken');
+    }
+
     // For registration, we'll use username as the email with a fake domain
-    const email = `${username}@ascii-bbs.local`;
+    const email = `${username.toLowerCase()}@ascii-bbs.local`;
     
     const { data, error } = await supabase.auth.signUp({
       email,
