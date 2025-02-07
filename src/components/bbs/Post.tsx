@@ -82,10 +82,10 @@ export const Post = ({
               <img
                 src={post.authorIcon}
                 alt={post.author}
-                className="w-[100px] h-[100px] rounded-none border border-primary/50 object-cover"
+                className="w-12 h-12 rounded-none border border-primary/50 object-cover"
               />
             ) : (
-              <MessageSquare className="w-[100px] h-[100px]" />
+              <MessageSquare className="w-12 h-12" />
             )}
             <div className="text-sm mt-2 text-center font-bold px-2 py-1 border border-primary/50">
               {post.author}
