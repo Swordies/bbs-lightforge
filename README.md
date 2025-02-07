@@ -1,3 +1,3 @@
-![image-4](https://github.com/user-attachments/assets/f9267df2-b532-4c56-91dc-ac462d3e212f)
+![image](https://github.com/user-attachments/assets/afffd623-9877-48d9-a2c3-01419faa44af)
 
 Made with Lovable, because oh wow?
