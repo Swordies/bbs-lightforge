@@ -35,6 +35,39 @@ const fetchPosts = async () => {
   return data;
 };
 
+const WelcomeMessage = () => (
+  <div className="bbs-card fade-in">
+    <div className="flex items-start gap-4">
+      <div className="flex-shrink-0">
+        <img
+          src="https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=100&h=100&fit=crop"
+          alt="ASCII BBS"
+          className="w-[100px] h-[100px] rounded-none border border-primary/50 object-cover"
+        />
+        <div className="text-sm mt-2 text-center font-bold px-2 py-1 border border-primary/50">
+          ASCII BBS
+        </div>
+      </div>
+      <div className="flex-1">
+        <div className="speech-bubble">
+          <div className="text-sm text-muted-foreground border border-primary/20 px-2 inline-block mb-4">
+            {new Date().toLocaleString()}
+          </div>
+          <div className="mb-4 [&_strong]:font-bold [&_em]:italic [&_s]:line-through [&_br]:block">
+            <strong>Welcome to ASCII BBS!</strong><br /><br />
+            This is a <em>minimalist</em> bulletin board system where you can:
+            <br />- Share your thoughts
+            <br />- Connect with others
+            <br />- Use <strong>text formatting</strong>
+            <br /><br />
+            Feel free to register and join the conversation!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 const Index = () => {
   const { user } = useAuth();
   const [newPost, setNewPost] = useState("");
@@ -152,35 +185,39 @@ const Index = () => {
       )}
 
       <div className="space-y-6">
-        {posts.map((post) => (
-          <PostContainer
-            key={post.id}
-            post={{
-              ...post,
-              author: post.author.username,
-              authorIcon: post.author.icon_url,
-              createdAt: new Date(post.created_at),
-              replies: post.replies?.map(reply => ({
-                ...reply,
-                author: reply.author.username,
-                authorIcon: reply.author.icon_url,
-                createdAt: new Date(reply.created_at)
-              }))
-            }}
-            user={user}
-            editingPost={editingPost}
-            editContent={editContent}
-            replyingTo={replyingTo}
-            replyContent={replyContent}
-            setEditContent={setEditContent}
-            setReplyContent={setReplyContent}
-            setReplyingTo={setReplyingTo}
-            handleEdit={handleEdit}
-            handleDelete={handleDelete}
-            handleSaveEdit={handleSaveEdit}
-            handleReply={handleReply}
-          />
-        ))}
+        {posts.length === 0 ? (
+          <WelcomeMessage />
+        ) : (
+          posts.map((post) => (
+            <PostContainer
+              key={post.id}
+              post={{
+                ...post,
+                author: post.author.username,
+                authorIcon: post.author.icon_url,
+                createdAt: new Date(post.created_at),
+                replies: post.replies?.map(reply => ({
+                  ...reply,
+                  author: reply.author.username,
+                  authorIcon: reply.author.icon_url,
+                  createdAt: new Date(reply.created_at)
+                }))
+              }}
+              user={user}
+              editingPost={editingPost}
+              editContent={editContent}
+              replyingTo={replyingTo}
+              replyContent={replyContent}
+              setEditContent={setEditContent}
+              setReplyContent={setReplyContent}
+              setReplyingTo={setReplyingTo}
+              handleEdit={handleEdit}
+              handleDelete={handleDelete}
+              handleSaveEdit={handleSaveEdit}
+              handleReply={handleReply}
+            />
+          ))
+        )}
       </div>
     </div>
   );
