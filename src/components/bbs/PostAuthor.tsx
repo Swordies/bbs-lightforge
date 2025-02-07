@@ -4,9 +4,10 @@ import { MessageSquare } from "lucide-react";
 interface PostAuthorProps {
   author: string;
   authorIcon?: string;
+  usernameBoxColor?: string;
 }
 
-export const PostAuthor = ({ author, authorIcon }: PostAuthorProps) => {
+export const PostAuthor = ({ author, authorIcon, usernameBoxColor }: PostAuthorProps) => {
   return (
     <div className="flex-shrink-0">
       {authorIcon ? (
@@ -18,7 +19,10 @@ export const PostAuthor = ({ author, authorIcon }: PostAuthorProps) => {
       ) : (
         <MessageSquare className="w-[100px] h-[100px]" />
       )}
-      <div className="text-sm mt-2 text-center font-bold px-2 py-1 border border-primary/50">
+      <div 
+        className="text-sm mt-2 text-center font-bold px-2 py-1 border border-primary/50"
+        style={usernameBoxColor ? { backgroundColor: usernameBoxColor } : undefined}
+      >
         {author}
       </div>
     </div>
