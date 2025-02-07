@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { PostContainer } from "@/components/bbs/PostContainer";
 import { PostForm } from "@/components/bbs/PostForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Post {
   id: string;
@@ -19,6 +19,7 @@ interface Post {
 }
 
 const fetchPosts = async () => {
+  console.log('Fetching posts...');
   const { data, error } = await supabase
     .from('posts')
     .select(`
@@ -31,7 +32,12 @@ const fetchPosts = async () => {
     `)
     .order('created_at', { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error('Error fetching posts:', error);
+    throw error;
+  }
+  
+  console.log('Posts fetched:', data);
   return data;
 };
 
@@ -76,102 +82,31 @@ const Index = () => {
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  const { data: posts = [], isLoading } = useQuery({
+  const { data: posts = [], isLoading, error } = useQuery({
     queryKey: ['posts'],
-    queryFn: fetchPosts
+    queryFn: fetchPosts,
+    onError: (error) => {
+      console.error('Query error:', error);
+      toast({
+        title: "Error loading posts",
+        description: error instanceof Error ? error.message : "Failed to load posts",
+        variant: "destructive",
+      });
+    }
   });
 
-  const handlePost = async () => {
-    if (!user || !newPost.trim()) return;
-
-    try {
-      const { error } = await supabase
-        .from('posts')
-        .insert({
-          content: newPost,
-          author_id: user.id
-        });
-
-      if (error) throw error;
-
-      setNewPost("");
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-    } catch (error) {
-      console.error('Error creating post:', error);
-    }
-  };
-
-  const handleEdit = (postId: string) => {
-    const post = posts.find((p) => p.id === postId);
-    if (post) {
-      setEditingPost(postId);
-      setEditContent(post.content);
-    }
-  };
-
-  const handleSaveEdit = async (postId: string) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('posts')
-        .update({ content: editContent })
-        .eq('id', postId)
-        .eq('author_id', user.id);
-
-      if (error) throw error;
-
-      setEditingPost(null);
-      setEditContent("");
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-    } catch (error) {
-      console.error('Error updating post:', error);
-    }
-  };
-
-  const handleDelete = async (postId: string) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('posts')
-        .delete()
-        .eq('id', postId)
-        .eq('author_id', user.id);
-
-      if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-    } catch (error) {
-      console.error('Error deleting post:', error);
-    }
-  };
-
-  const handleReply = async (postId: string) => {
-    if (!user || !replyContent.trim()) return;
-
-    try {
-      const { error } = await supabase
-        .from('replies')
-        .insert({
-          content: replyContent,
-          author_id: user.id,
-          post_id: postId
-        });
-
-      if (error) throw error;
-
-      setReplyingTo(null);
-      setReplyContent("");
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-    } catch (error) {
-      console.error('Error creating reply:', error);
-    }
-  };
+  if (error) {
+    return (
+      <div className="text-center text-red-500">
+        Error loading posts: {error instanceof Error ? error.message : "Unknown error"}
+      </div>
+    );
+  }
 
   if (isLoading) {
-    return <div className="text-center">Loading posts...</div>;
+    return <div className="text-center animate-pulse">Loading posts...</div>;
   }
 
   return (
@@ -180,7 +115,32 @@ const Index = () => {
         <PostForm
           newPost={newPost}
           setNewPost={setNewPost}
-          handlePost={handlePost}
+          handlePost={async () => {
+            try {
+              const { error } = await supabase
+                .from('posts')
+                .insert({
+                  content: newPost,
+                  author_id: user.id
+                });
+
+              if (error) throw error;
+
+              setNewPost("");
+              queryClient.invalidateQueries({ queryKey: ['posts'] });
+              toast({
+                title: "Post created",
+                description: "Your post has been published successfully.",
+              });
+            } catch (error) {
+              console.error('Error creating post:', error);
+              toast({
+                title: "Error creating post",
+                description: error instanceof Error ? error.message : "Failed to create post",
+                variant: "destructive",
+              });
+            }
+          }}
         />
       )}
 
