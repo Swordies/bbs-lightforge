@@ -1,9 +1,9 @@
-
 import { useState } from "react";
 import { MessageSquare, Edit2, Trash2 } from "lucide-react";
 import { formatText } from "@/lib/formatText";
 import { Button } from "@/components/ui/button";
 import { PostForm } from "./PostForm";
+import { getContrastColor } from "@/lib/colorUtils";
 
 interface ReplyProps {
   reply: {
