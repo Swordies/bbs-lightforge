@@ -21,8 +21,9 @@ export const useAuth = create<AuthState>((set) => ({
 
   login: async (username: string, password: string) => {
     try {
-      // Ensure consistent email format with lowercase
-      const email = `${username.toLowerCase()}@ascii-bbs.local`;
+      // Convert username to lowercase for consistent email formation
+      const normalizedUsername = username.toLowerCase();
+      const email = `${normalizedUsername}@ascii-bbs.local`;
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -55,33 +56,35 @@ export const useAuth = create<AuthState>((set) => ({
         }
       }
     } catch (error) {
-      // Re-throw to maintain error chain
       throw error;
     }
   },
 
   register: async (username: string, password: string) => {
     try {
+      // Convert username to lowercase for checking
+      const normalizedUsername = username.toLowerCase();
+      
       // Check if username already exists (case insensitive)
       const { data: existingProfile } = await supabase
         .from('profiles')
         .select('username')
-        .ilike('username', username)
+        .ilike('username', normalizedUsername)
         .single();
 
       if (existingProfile) {
         throw new Error('Username already taken');
       }
 
-      // Ensure consistent email format with lowercase
-      const email = `${username.toLowerCase()}@ascii-bbs.local`;
+      // Use normalized username for email
+      const email = `${normalizedUsername}@ascii-bbs.local`;
       
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            username: username,
+            username: username, // Keep original case for display
           },
         },
       });
@@ -97,7 +100,6 @@ export const useAuth = create<AuthState>((set) => ({
         });
       }
     } catch (error) {
-      // Re-throw to maintain error chain
       throw error;
     }
   },
