@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Bold, Italic, Underline, List } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface PostFormProps {
   newPost: string;
@@ -10,142 +10,140 @@ interface PostFormProps {
   handlePost: () => void;
 }
 
+type FormatType = 'bold' | 'italic' | 'underline' | 'list';
+
 export const PostForm = ({ newPost, setNewPost, handlePost }: PostFormProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [activeFormats, setActiveFormats] = useState<FormatType[]>([]);
+  const [formatPositions, setFormatPositions] = useState<Record<FormatType, number>>({
+    bold: -1,
+    italic: -1,
+    underline: -1,
+    list: -1
+  });
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.ctrlKey || e.metaKey) {
       const start = e.currentTarget.selectionStart;
-      const end = e.currentTarget.selectionEnd;
-      const value = e.currentTarget.value;
-      let newValue = value;
-      let newCursorPos = end;
+      let formatType: FormatType | null = null;
 
       switch (e.key.toLowerCase()) {
         case 'b':
           e.preventDefault();
-          newValue = value.substring(0, start) + 
-            `**${value.substring(start, end)}**` + 
-            value.substring(end);
-          newCursorPos = end + 4;
+          formatType = 'bold';
           break;
         case 'i':
           e.preventDefault();
-          newValue = value.substring(0, start) + 
-            `_${value.substring(start, end)}_` + 
-            value.substring(end);
-          newCursorPos = end + 2;
+          formatType = 'italic';
           break;
         case 'u':
           e.preventDefault();
-          newValue = value.substring(0, start) + 
-            `__${value.substring(start, end)}__` + 
-            value.substring(end);
-          newCursorPos = end + 4;
+          formatType = 'underline';
           break;
         case '-':
           e.preventDefault();
-          newValue = value.substring(0, start) + 
-            `\n- ${value.substring(start, end)}` + 
-            value.substring(end);
-          newCursorPos = end + 3;
+          formatType = 'list';
           break;
       }
 
+      if (formatType) {
+        toggleFormat(formatType, start);
+      }
+    }
+  };
+
+  const getFormatSyntax = (type: FormatType): { opening: string; closing: string } => {
+    switch (type) {
+      case 'bold':
+        return { opening: '**', closing: '**' };
+      case 'italic':
+        return { opening: '_', closing: '_' };
+      case 'underline':
+        return { opening: '__', closing: '__' };
+      case 'list':
+        return { opening: '\n- ', closing: '' };
+    }
+  };
+
+  const toggleFormat = (type: FormatType, cursorPos: number) => {
+    if (activeFormats.includes(type)) {
+      // Close the format
+      const syntax = getFormatSyntax(type);
+      const newValue = newPost + syntax.closing;
       setNewPost(newValue);
-      // Set cursor position after state update
+      setActiveFormats(activeFormats.filter(f => f !== type));
+      setFormatPositions(prev => ({ ...prev, [type]: -1 }));
+
+      // Set cursor position after the closing syntax
       setTimeout(() => {
         if (textareaRef.current) {
-          textareaRef.current.selectionStart = newCursorPos;
-          textareaRef.current.selectionEnd = newCursorPos;
+          const newPos = newValue.length;
+          textareaRef.current.selectionStart = newPos;
+          textareaRef.current.selectionEnd = newPos;
+          textareaRef.current.focus();
+        }
+      }, 0);
+    } else {
+      // Open the format
+      const syntax = getFormatSyntax(type);
+      const newValue = newPost + syntax.opening;
+      setNewPost(newValue);
+      setActiveFormats([...activeFormats, type]);
+      setFormatPositions(prev => ({ ...prev, [type]: cursorPos }));
+
+      // Set cursor position after the opening syntax
+      setTimeout(() => {
+        if (textareaRef.current) {
+          const newPos = newValue.length;
+          textareaRef.current.selectionStart = newPos;
+          textareaRef.current.selectionEnd = newPos;
           textareaRef.current.focus();
         }
       }, 0);
     }
   };
 
-  const formatText = (type: 'bold' | 'italic' | 'underline' | 'list') => {
+  const formatText = (type: FormatType) => {
     if (!textareaRef.current) return;
-
-    const start = textareaRef.current.selectionStart;
-    const end = textareaRef.current.selectionEnd;
-    const value = textareaRef.current.value;
-    let newValue = value;
-    let newCursorPos = end;
-
-    switch (type) {
-      case 'bold':
-        newValue = value.substring(0, start) + 
-          `**${value.substring(start, end)}**` + 
-          value.substring(end);
-        newCursorPos = end + 4;
-        break;
-      case 'italic':
-        newValue = value.substring(0, start) + 
-          `_${value.substring(start, end)}_` + 
-          value.substring(end);
-        newCursorPos = end + 2;
-        break;
-      case 'underline':
-        newValue = value.substring(0, start) + 
-          `__${value.substring(start, end)}__` + 
-          value.substring(end);
-        newCursorPos = end + 4;
-        break;
-      case 'list':
-        newValue = value.substring(0, start) + 
-          `\n- ${value.substring(start, end)}` + 
-          value.substring(end);
-        newCursorPos = end + 3;
-        break;
-    }
-
-    setNewPost(newValue);
-    // Set cursor position after state update
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.selectionStart = newCursorPos;
-        textareaRef.current.selectionEnd = newCursorPos;
-        textareaRef.current.focus();
-      }
-    }, 0);
+    const cursorPos = textareaRef.current.selectionStart;
+    toggleFormat(type, cursorPos);
   };
 
   return (
     <div className="bbs-card fade-in space-y-4">
       <div className="flex gap-2">
         <Button 
-          variant="outline" 
+          variant={activeFormats.includes('bold') ? "default" : "outline"}
           size="icon"
           onClick={() => formatText('bold')}
-          className="bbs-button"
+          className={`bbs-button ${activeFormats.includes('bold') ? 'bg-[#1A1F2C] text-white' : ''}`}
           title="Bold (Ctrl+B)"
         >
           <Bold className="h-4 w-4" />
         </Button>
         <Button 
-          variant="outline" 
+          variant={activeFormats.includes('italic') ? "default" : "outline"}
           size="icon"
           onClick={() => formatText('italic')}
-          className="bbs-button"
+          className={`bbs-button ${activeFormats.includes('italic') ? 'bg-[#1A1F2C] text-white' : ''}`}
           title="Italic (Ctrl+I)"
         >
           <Italic className="h-4 w-4" />
         </Button>
         <Button 
-          variant="outline" 
+          variant={activeFormats.includes('underline') ? "default" : "outline"}
           size="icon"
           onClick={() => formatText('underline')}
-          className="bbs-button"
+          className={`bbs-button ${activeFormats.includes('underline') ? 'bg-[#1A1F2C] text-white' : ''}`}
           title="Underline (Ctrl+U)"
         >
           <Underline className="h-4 w-4" />
         </Button>
         <Button 
-          variant="outline" 
+          variant={activeFormats.includes('list') ? "default" : "outline"}
           size="icon"
           onClick={() => formatText('list')}
-          className="bbs-button"
+          className={`bbs-button ${activeFormats.includes('list') ? 'bg-[#1A1F2C] text-white' : ''}`}
           title="List (Ctrl+-)"
         >
           <List className="h-4 w-4" />
