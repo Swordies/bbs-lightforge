@@ -9,7 +9,7 @@ interface PostAuthorProps {
   usernameBoxColor?: string;
 }
 
-export const PostAuthor = memo(({ author, authorIcon, usernameBoxColor }: PostAuthorProps) => {
+const PostAuthor = memo(({ author, authorIcon, usernameBoxColor }: PostAuthorProps) => {
   return (
     <div className="flex-shrink-0">
       {authorIcon ? (
@@ -36,3 +36,6 @@ export const PostAuthor = memo(({ author, authorIcon, usernameBoxColor }: PostAu
 });
 
 PostAuthor.displayName = "PostAuthor";
+
+export default PostAuthor;
+

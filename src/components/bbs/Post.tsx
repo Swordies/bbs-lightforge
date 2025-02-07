@@ -1,5 +1,5 @@
 
-import { PostAuthor } from "./PostAuthor";
+import PostAuthor from "./PostAuthor";
 import { PostContent } from "./PostContent";
 import { useDeleteConfirm } from "./useDeleteConfirm";
 
@@ -51,7 +51,6 @@ export const Post = ({
     }
   };
 
-  // Get the username box color if the post author matches the current user
   const usernameBoxColor = user?.username === post.author ? user?.usernameBoxColor : undefined;
 
   return (
@@ -83,3 +82,4 @@ export const Post = ({
     </div>
   );
 };
+
