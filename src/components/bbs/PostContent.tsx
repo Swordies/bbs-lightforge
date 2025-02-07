@@ -12,6 +12,7 @@ interface PostContentProps {
     content: string;
     author: string;
     createdAt: Date;
+    editedAt?: Date;
   };
   user: { username: string } | null;
   editingPost: string | null;
@@ -50,8 +51,15 @@ export const PostContent = ({
     <div className="flex-1">
       <div className="speech-bubble">
         <div className="flex justify-between items-center mb-4">
-          <div className="text-sm text-muted-foreground border border-primary/20 px-2 inline-block">
-            {post.createdAt.toLocaleString()}
+          <div className="text-sm text-muted-foreground">
+            <span className="border border-primary/20 px-2 inline-block">
+              {post.createdAt.toLocaleString()}
+            </span>
+            {post.editedAt && (
+              <span className="ml-2 border border-primary/20 px-2 inline-block">
+                Edited on {post.editedAt.toLocaleString()}
+              </span>
+            )}
           </div>
           <Button
             variant="ghost"

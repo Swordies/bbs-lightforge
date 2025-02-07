@@ -5,6 +5,7 @@ export interface Post {
   author: string;
   authorIcon?: string;
   createdAt: Date;
+  editedAt?: Date;
   replies?: Post[];
 }
 

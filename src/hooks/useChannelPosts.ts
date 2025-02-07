@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Post } from "@/types/channel";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,7 +48,7 @@ export const useChannelPosts = (channelId: string) => {
 
   const handleSaveEdit = (postId: string) => {
     const updatedPosts = posts.map((post) =>
-      post.id === postId ? { ...post, content: editContent } : post
+      post.id === postId ? { ...post, content: editContent, editedAt: new Date() } : post
     );
     setPosts(updatedPosts);
     savePosts(channelId, updatedPosts);
@@ -135,4 +134,3 @@ export const useChannelPosts = (channelId: string) => {
     handleDeleteReply,
   };
 };
-
