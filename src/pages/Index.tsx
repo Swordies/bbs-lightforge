@@ -13,18 +13,27 @@ interface Post {
   replies?: Post[];
 }
 
+const generateRandomId = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 15; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
 const Index = () => {
   const { user } = useAuth();
   const [posts, setPosts] = useState<Post[]>([
     {
-      id: "welcome",
+      id: "xK9nM2pQ5vR8sT3",
       content: "Welcome to ASCII BBS! This is a minimalist bulletin board system where you can share your thoughts and connect with others. Feel free to register and join the conversation!",
       author: "Admin",
       authorIcon: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=100&h=100&fit=crop",
       createdAt: new Date("2024-01-01T12:00:00"),
       replies: [
         {
-          id: "welcome-reply",
+          id: "hJ4wL7yB9cN6mD1",
           content: "Thanks for creating this space! The retro aesthetic brings back memories of the early internet days.",
           author: "RetroFan",
           authorIcon: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=100&h=100&fit=crop",
@@ -43,7 +52,7 @@ const Index = () => {
     if (!user || !newPost.trim()) return;
 
     const post: Post = {
-      id: Date.now().toString(),
+      id: generateRandomId(),
       content: newPost,
       author: user.username,
       authorIcon: user.iconUrl,
@@ -81,7 +90,7 @@ const Index = () => {
     if (!user || !replyContent.trim()) return;
 
     const reply: Post = {
-      id: Date.now().toString(),
+      id: generateRandomId(),
       content: replyContent,
       author: user.username,
       authorIcon: user.iconUrl,
