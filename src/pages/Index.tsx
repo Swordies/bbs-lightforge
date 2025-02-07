@@ -29,9 +29,7 @@ const channels = {
   },
 };
 
-const welcomeMessage = `**Welcome to Lightforge BBS!**
-
-Here you can:
+const welcomeMessage = `Here you can:
 - Share your thoughts and ideas
 - Connect with other members
 - Explore different topics
@@ -103,7 +101,7 @@ const Index = () => {
       </div>
 
       <div className="bbs-card fade-in mt-2">
-        <div className="flex items-start gap-4">
+        <div className="flex items-start gap-4 flex-row-reverse">
           <div className="flex-shrink-0">
             <img
               src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=100&h=100&fit=crop"
@@ -115,7 +113,7 @@ const Index = () => {
             </div>
           </div>
           <div className="flex-1">
-            <div className="speech-bubble">
+            <div className="speech-bubble speech-bubble-right">
               <div className="text-sm text-muted-foreground border border-primary/20 px-2 mb-4 inline-block">
                 {new Date().toLocaleString()}
               </div>
