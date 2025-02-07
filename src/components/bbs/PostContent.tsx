@@ -1,9 +1,9 @@
-
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { formatText } from "@/lib/formatText";
 import { Edit2, Trash2, Reply as ReplyIcon, Link } from "lucide-react";
 import { ReplyForm } from "./ReplyForm";
+import { PostForm } from "./PostForm";
 
 interface PostContentProps {
   post: {
@@ -63,22 +63,15 @@ export const PostContent = ({
         </div>
 
         {editingPost === post.id ? (
-          <div className="space-y-2">
-            <Textarea
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-              className="bbs-input w-full min-h-[100px]"
-            />
-            <Button
-              onClick={() => handleSaveEdit(post.id)}
-              className="bbs-button hover:bg-[#1A1F2C] hover:text-white"
-            >
-              Save
-            </Button>
-          </div>
+          <PostForm
+            newPost={editContent}
+            setNewPost={setEditContent}
+            handlePost={() => handleSaveEdit(post.id)}
+            isEditing={true}
+          />
         ) : (
           <div 
-            className="mb-4 [&_strong]:font-bold [&_em]:italic [&_u]:underline [&_br]:block"
+            className="mb-4 [&_strong]:font-bold [&_em]:italic [&_u]:underline [&_s]:line-through [&_br]:block"
             dangerouslySetInnerHTML={{ 
               __html: formatText(post.content) 
             }} 
