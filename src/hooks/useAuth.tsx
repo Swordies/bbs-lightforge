@@ -20,7 +20,9 @@ interface AuthState {
 export const useAuth = create<AuthState>((set) => ({
   user: null,
 
-  login: async (email: string, password: string) => {
+  login: async (username: string, password: string) => {
+    // For login, we'll use username as the email with a fake domain
+    const email = `${username}@ascii-bbs.local`;
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -47,8 +49,9 @@ export const useAuth = create<AuthState>((set) => ({
     }
   },
 
-  register: async (email: string, password: string) => {
-    const username = email.split('@')[0]; // Use the part before @ as username
+  register: async (username: string, password: string) => {
+    // For registration, we'll use username as the email with a fake domain
+    const email = `${username}@ascii-bbs.local`;
     
     const { data, error } = await supabase.auth.signUp({
       email,

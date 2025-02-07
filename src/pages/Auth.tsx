@@ -8,7 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const { login, register } = useAuth();
   const navigate = useNavigate();
@@ -18,16 +18,16 @@ const Auth = () => {
     e.preventDefault();
     try {
       if (isLogin) {
-        await login(email, password);
+        await login(username, password);
       } else {
-        await register(email, password);
+        await register(username, password);
       }
       navigate("/");
       toast({
         title: isLogin ? "Welcome back!" : "Welcome to ASCII BBS!",
         description: isLogin 
           ? "You have successfully logged in." 
-          : "Your account has been created. Check your email to verify your account.",
+          : "Your account has been created successfully.",
       });
     } catch (error) {
       console.error(error);
@@ -48,10 +48,10 @@ const Auth = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="bbs-input w-full"
             />
           </div>
