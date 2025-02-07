@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare, Edit2, Trash2, Reply as ReplyIcon, Link } from "lucide-react";
@@ -131,7 +132,9 @@ export const Post = ({
               ) : (
                 <div 
                   className="mb-4 whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{ __html: formatText(post.content) }}
+                  dangerouslySetInnerHTML={{ 
+                    __html: formatText(post.content) 
+                  }} 
                 />
               )}
 
@@ -161,9 +164,11 @@ export const Post = ({
                         variant={deleteConfirmId === post.id ? "destructive" : "ghost"}
                         size="sm"
                         onClick={(e) => handleDeleteClick(post.id, e)}
-                        className="bbs-button hover:bg-[#1A1F2C] hover:text-white"
+                        className={`bbs-button hover:bg-[#1A1F2C] hover:text-white ${
+                          deleteConfirmId === post.id ? 'bg-red-500 text-white' : ''
+                        }`}
                       >
-                        <Trash2 className="w-4 h-4 mr-1" /> Delete
+                        <Trash2 className="w-4 h-4 mr-1" /> {deleteConfirmId === post.id ? 'Confirm Delete' : 'Delete'}
                       </Button>
                     </>
                   )}
