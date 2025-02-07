@@ -1,4 +1,5 @@
 
+import { memo } from "react";
 import { Reply } from "./Reply";
 import { Post } from "./Post";
 
@@ -33,7 +34,7 @@ interface PostContainerProps {
   handleDeleteReply: (postId: string, replyId: string) => void;
 }
 
-export const PostContainer = ({
+export const PostContainer = memo(({
   post,
   user,
   editingPost,
@@ -84,4 +85,6 @@ export const PostContainer = ({
       )}
     </div>
   );
-};
+});
+
+PostContainer.displayName = "PostContainer";

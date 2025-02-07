@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { memo, useState, useCallback } from "react";
 import { MessageSquare, Edit2, Trash2 } from "lucide-react";
 import { formatText } from "@/lib/formatText";
 import { Button } from "@/components/ui/button";
@@ -21,22 +21,22 @@ interface ReplyProps {
   onDelete: (postId: string, replyId: string) => void;
 }
 
-export const Reply = ({ reply, user, postId, onEdit, onDelete }: ReplyProps) => {
+export const Reply = memo(({ reply, user, postId, onEdit, onDelete }: ReplyProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(reply.content);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const handleEdit = () => {
+  const handleEdit = useCallback(() => {
     setIsEditing(true);
     setEditContent(reply.content);
-  };
+  }, [reply.content]);
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = useCallback(() => {
     onEdit(postId, reply.id, editContent);
     setIsEditing(false);
-  };
+  }, [postId, reply.id, editContent, onEdit]);
 
-  const handleDeleteClick = (replyId: string, e: React.MouseEvent) => {
+  const handleDeleteClick = useCallback((replyId: string, e: React.MouseEvent) => {
     e.preventDefault();
     if (deleteConfirmId === replyId) {
       onDelete(postId, replyId);
@@ -44,7 +44,7 @@ export const Reply = ({ reply, user, postId, onEdit, onDelete }: ReplyProps) => 
     } else {
       setDeleteConfirmId(replyId);
     }
-  };
+  }, [deleteConfirmId, postId, onDelete]);
 
   return (
     <div className="bbs-card fade-in">
@@ -55,6 +55,7 @@ export const Reply = ({ reply, user, postId, onEdit, onDelete }: ReplyProps) => 
               src={reply.authorIcon}
               alt={reply.author}
               className="w-[100px] h-[100px] rounded-none border border-primary/50 object-cover"
+              loading="lazy"
             />
           ) : (
             <MessageSquare className="w-[100px] h-[100px]" />
@@ -125,4 +126,6 @@ export const Reply = ({ reply, user, postId, onEdit, onDelete }: ReplyProps) => 
       </div>
     </div>
   );
-};
+});
+
+Reply.displayName = "Reply";

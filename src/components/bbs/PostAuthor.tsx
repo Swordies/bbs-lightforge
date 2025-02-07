@@ -1,4 +1,5 @@
 
+import { memo } from "react";
 import { MessageSquare } from "lucide-react";
 import { getContrastColor } from "@/lib/colorUtils";
 
@@ -8,7 +9,7 @@ interface PostAuthorProps {
   usernameBoxColor?: string;
 }
 
-export const PostAuthor = ({ author, authorIcon, usernameBoxColor }: PostAuthorProps) => {
+export const PostAuthor = memo(({ author, authorIcon, usernameBoxColor }: PostAuthorProps) => {
   return (
     <div className="flex-shrink-0">
       {authorIcon ? (
@@ -16,6 +17,7 @@ export const PostAuthor = ({ author, authorIcon, usernameBoxColor }: PostAuthorP
           src={authorIcon}
           alt={author}
           className="w-[100px] h-[100px] rounded-none border border-primary/50 object-cover"
+          loading="lazy"
         />
       ) : (
         <MessageSquare className="w-[100px] h-[100px]" />
@@ -31,5 +33,6 @@ export const PostAuthor = ({ author, authorIcon, usernameBoxColor }: PostAuthorP
       </div>
     </div>
   );
-};
+});
 
+PostAuthor.displayName = "PostAuthor";
