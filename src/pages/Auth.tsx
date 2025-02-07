@@ -14,8 +14,20 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const isFormValid = username.trim().length >= 3 && password.length >= 6;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isFormValid) {
+      toast({
+        title: "Validation Error",
+        description: "Username must be at least 3 characters and password at least 6 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       if (isLogin) {
         await login(username, password);
@@ -30,7 +42,6 @@ const Auth = () => {
           : "Your account has been created successfully.",
       });
     } catch (error) {
-      console.error(error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "An error occurred",
@@ -49,22 +60,30 @@ const Auth = () => {
           <div>
             <Input
               type="text"
-              placeholder="Username"
+              placeholder="Username (min. 3 characters)"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="bbs-input w-full"
+              minLength={3}
+              required
             />
           </div>
           <div>
             <Input
               type="password"
-              placeholder="Password"
+              placeholder="Password (min. 6 characters)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="bbs-input w-full"
+              minLength={6}
+              required
             />
           </div>
-          <Button type="submit" className="bbs-button w-full">
+          <Button 
+            type="submit" 
+            className="bbs-button w-full"
+            disabled={!isFormValid}
+          >
             {isLogin ? "Login" : "Register"}
           </Button>
         </form>
@@ -73,6 +92,7 @@ const Auth = () => {
           <button
             onClick={() => setIsLogin(!isLogin)}
             className="text-primary hover:underline"
+            type="button"
           >
             {isLogin ? "Register" : "Login"}
           </button>

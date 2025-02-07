@@ -15,8 +15,7 @@ export interface Post {
   replies?: Post[];
 }
 
-const fetchPosts = async () => {
-  console.log('Fetching posts...');
+const fetchPosts = async (): Promise<Post[]> => {
   const { data, error } = await supabase
     .from('posts')
     .select(`
@@ -29,13 +28,8 @@ const fetchPosts = async () => {
     `)
     .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching posts:', error);
-    throw error;
-  }
-  
-  console.log('Posts fetched:', data);
-  return data;
+  if (error) throw error;
+  return data || [];
 };
 
 export const usePosts = () => {
@@ -47,7 +41,6 @@ export const usePosts = () => {
     queryFn: fetchPosts,
     meta: {
       onError: (error: Error) => {
-        console.error('Query error:', error);
         toast({
           title: "Error loading posts",
           description: error.message || "Failed to load posts",
@@ -58,112 +51,100 @@ export const usePosts = () => {
   });
 
   const handleCreatePost = async (content: string, userId: string) => {
-    try {
-      const { error } = await supabase
-        .from('posts')
-        .insert({
-          content,
-          author_id: userId
-        });
-
-      if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-      toast({
-        title: "Post created",
-        description: "Your post has been published successfully.",
+    const { error } = await supabase
+      .from('posts')
+      .insert({
+        content,
+        author_id: userId
       });
-      return true;
-    } catch (error) {
-      console.error('Error creating post:', error);
+
+    if (error) {
       toast({
         title: "Error creating post",
-        description: error instanceof Error ? error.message : "Failed to create post",
+        description: error.message,
         variant: "destructive",
       });
       return false;
     }
+
+    await queryClient.invalidateQueries({ queryKey: ['posts'] });
+    toast({
+      title: "Post created",
+      description: "Your post has been published successfully.",
+    });
+    return true;
   };
 
   const handleEdit = async (id: string, content: string) => {
-    try {
-      const { error } = await supabase
-        .from('posts')
-        .update({ content })
-        .eq('id', id);
+    const { error } = await supabase
+      .from('posts')
+      .update({ content })
+      .eq('id', id);
 
-      if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-      toast({
-        title: "Post updated",
-        description: "Your post has been updated successfully.",
-      });
-      return true;
-    } catch (error) {
-      console.error('Error updating post:', error);
+    if (error) {
       toast({
         title: "Error updating post",
-        description: error instanceof Error ? error.message : "Failed to update post",
+        description: error.message,
         variant: "destructive",
       });
       return false;
     }
+
+    await queryClient.invalidateQueries({ queryKey: ['posts'] });
+    toast({
+      title: "Post updated",
+      description: "Your post has been updated successfully.",
+    });
+    return true;
   };
 
   const handleDelete = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('posts')
-        .delete()
-        .eq('id', id);
+    const { error } = await supabase
+      .from('posts')
+      .delete()
+      .eq('id', id);
 
-      if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-      toast({
-        title: "Post deleted",
-        description: "Your post has been deleted successfully.",
-      });
-      return true;
-    } catch (error) {
-      console.error('Error deleting post:', error);
+    if (error) {
       toast({
         title: "Error deleting post",
-        description: error instanceof Error ? error.message : "Failed to delete post",
+        description: error.message,
         variant: "destructive",
       });
       return false;
     }
+
+    await queryClient.invalidateQueries({ queryKey: ['posts'] });
+    toast({
+      title: "Post deleted",
+      description: "Your post has been deleted successfully.",
+    });
+    return true;
   };
 
   const handleReply = async (postId: string, content: string, userId: string) => {
-    try {
-      const { error } = await supabase
-        .from('replies')
-        .insert({
-          content,
-          post_id: postId,
-          author_id: userId
-        });
-
-      if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-      toast({
-        title: "Reply added",
-        description: "Your reply has been posted successfully.",
+    const { error } = await supabase
+      .from('replies')
+      .insert({
+        content,
+        post_id: postId,
+        author_id: userId
       });
-      return true;
-    } catch (error) {
-      console.error('Error creating reply:', error);
+
+    if (error) {
       toast({
         title: "Error posting reply",
-        description: error instanceof Error ? error.message : "Failed to post reply",
+        description: error.message,
         variant: "destructive",
       });
       return false;
     }
+
+    await queryClient.invalidateQueries({ queryKey: ['posts'] });
+    toast({
+      title: "Reply added",
+      description: "Your reply has been posted successfully.",
+    });
+    return true;
   };
 
   return {

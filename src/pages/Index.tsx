@@ -6,42 +6,47 @@ import { PostForm } from "@/components/bbs/PostForm";
 import { WelcomeMessage } from "@/components/bbs/WelcomeMessage";
 import { usePosts } from "@/hooks/usePosts";
 
+interface EditingState {
+  postId: string | null;
+  content: string;
+}
+
+interface ReplyingState {
+  postId: string | null;
+  content: string;
+}
+
 const Index = () => {
   const { user } = useAuth();
   const { posts, isLoading, error, handleCreatePost, handleEdit, handleDelete, handleReply } = usePosts();
   const [newPost, setNewPost] = useState("");
-  const [editingPost, setEditingPost] = useState<string | null>(null);
-  const [editContent, setEditContent] = useState("");
-  const [replyingTo, setReplyingTo] = useState<string | null>(null);
-  const [replyContent, setReplyContent] = useState("");
+  const [editing, setEditing] = useState<EditingState>({ postId: null, content: "" });
+  const [replying, setReplying] = useState<ReplyingState>({ postId: null, content: "" });
 
   const handlePostEdit = async (id: string) => {
     const post = posts.find(p => p.id === id);
     if (post) {
-      setEditingPost(id);
-      setEditContent(post.content);
+      setEditing({ postId: id, content: post.content });
     }
   };
 
   const handleSaveEdit = async (id: string) => {
-    if (await handleEdit(id, editContent)) {
-      setEditingPost(null);
-      setEditContent("");
+    if (await handleEdit(id, editing.content)) {
+      setEditing({ postId: null, content: "" });
     }
   };
 
   const handlePostReply = async (postId: string) => {
     if (!user) return;
-    if (await handleReply(postId, replyContent, user.id)) {
-      setReplyingTo(null);
-      setReplyContent("");
+    if (await handleReply(postId, replying.content, user.id)) {
+      setReplying({ postId: null, content: "" });
     }
   };
 
   if (error) {
     return (
       <div className="text-center text-red-500">
-        Error loading posts: {error instanceof Error ? error.message : "Unknown error"}
+        {error instanceof Error ? error.message : "Unknown error"}
       </div>
     );
   }
@@ -84,13 +89,13 @@ const Index = () => {
                 }))
               }}
               user={user}
-              editingPost={editingPost}
-              editContent={editContent}
-              replyingTo={replyingTo}
-              replyContent={replyContent}
-              setEditContent={setEditContent}
-              setReplyContent={setReplyContent}
-              setReplyingTo={setReplyingTo}
+              editingPost={editing.postId}
+              editContent={editing.content}
+              replyingTo={replying.postId}
+              replyContent={replying.content}
+              setEditContent={(content) => setEditing(prev => ({ ...prev, content }))}
+              setReplyContent={(content) => setReplying(prev => ({ ...prev, content }))}
+              setReplyingTo={(postId) => setReplying({ postId, content: "" })}
               handleEdit={handlePostEdit}
               handleDelete={handleDelete}
               handleSaveEdit={handleSaveEdit}
