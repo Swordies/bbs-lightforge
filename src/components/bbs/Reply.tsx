@@ -1,5 +1,6 @@
 
 import { MessageSquare } from "lucide-react";
+import { formatText } from "@/lib/formatText";
 
 interface ReplyProps {
   reply: {
@@ -35,9 +36,10 @@ export const Reply = ({ reply }: ReplyProps) => {
             <div className="text-sm text-muted-foreground border border-primary/20 px-2 mb-4 inline-block">
               {reply.createdAt.toLocaleString()}
             </div>
-            <div>
-              {reply.content}
-            </div>
+            <div 
+              className="[&_strong]:font-bold [&_em]:italic [&_s]:line-through [&_br]:block"
+              dangerouslySetInnerHTML={{ __html: formatText(reply.content) }} 
+            />
           </div>
         </div>
       </div>
