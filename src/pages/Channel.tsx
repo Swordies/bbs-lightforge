@@ -129,6 +129,36 @@ const Channel = () => {
     setReplyContent("");
   };
 
+  const handleEditReply = (postId: string, replyId: string, newContent: string) => {
+    const updatedPosts = posts.map((post) => {
+      if (post.id === postId && post.replies) {
+        return {
+          ...post,
+          replies: post.replies.map((reply) =>
+            reply.id === replyId ? { ...reply, content: newContent } : reply
+          ),
+        };
+      }
+      return post;
+    });
+    setPosts(updatedPosts);
+    savePosts(channelId || '', updatedPosts);
+  };
+
+  const handleDeleteReply = (postId: string, replyId: string) => {
+    const updatedPosts = posts.map((post) => {
+      if (post.id === postId && post.replies) {
+        return {
+          ...post,
+          replies: post.replies.filter((reply) => reply.id !== replyId),
+        };
+      }
+      return post;
+    });
+    setPosts(updatedPosts);
+    savePosts(channelId || '', updatedPosts);
+  };
+
   return (
     <div className="space-y-4 max-w-5xl mx-auto px-2">
       <div className="border-2 border-primary/50 p-4 mb-6">
@@ -169,6 +199,8 @@ const Channel = () => {
             handleDelete={handleDelete}
             handleSaveEdit={handleSaveEdit}
             handleReply={handleReply}
+            handleEditReply={handleEditReply}
+            handleDeleteReply={handleDeleteReply}
           />
         ))}
       </div>

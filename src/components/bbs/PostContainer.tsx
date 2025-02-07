@@ -29,6 +29,8 @@ interface PostContainerProps {
   handleDelete: (id: string) => void;
   handleSaveEdit: (id: string) => void;
   handleReply: (id: string) => void;
+  handleEditReply: (postId: string, replyId: string, newContent: string) => void;
+  handleDeleteReply: (postId: string, replyId: string) => void;
 }
 
 export const PostContainer = ({
@@ -45,6 +47,8 @@ export const PostContainer = ({
   handleDelete,
   handleSaveEdit,
   handleReply,
+  handleEditReply,
+  handleDeleteReply,
 }: PostContainerProps) => {
   return (
     <div className="space-y-2">
@@ -67,11 +71,17 @@ export const PostContainer = ({
       {post.replies && post.replies.length > 0 && (
         <div className="pl-8 space-y-2">
           {post.replies.map((reply) => (
-            <Reply key={reply.id} reply={reply} />
+            <Reply 
+              key={reply.id} 
+              reply={reply} 
+              user={user}
+              postId={post.id}
+              onEdit={handleEditReply}
+              onDelete={handleDeleteReply}
+            />
           ))}
         </div>
       )}
     </div>
   );
 };
-
