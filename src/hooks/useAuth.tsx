@@ -8,15 +8,34 @@ interface User {
   iconUrl?: string;
 }
 
+interface Post {
+  id: string;
+  content: string;
+  author: string;
+  authorIcon?: string;
+  createdAt: Date;
+  replies?: Array<{
+    id: string;
+    content: string;
+    author: string;
+    authorIcon?: string;
+    createdAt: Date;
+  }>;
+}
+
 interface AuthState {
   user: User | null;
+  posts: Record<string, Post[]>;
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, password: string) => Promise<void>;
   logout: () => void;
   updateIcon: (iconUrl: string) => Promise<void>;
+  savePosts: (channelId: string, posts: Post[]) => void;
+  getChannelPosts: (channelId: string) => Post[];
 }
 
 const COOKIE_KEY = 'user';
+const POSTS_COOKIE_KEY = 'channel_posts';
 const COOKIE_EXPIRES = 30; // days
 
 // Memoized initial user state from cookies
@@ -25,14 +44,37 @@ const getInitialUser = (): User | null => {
     const userCookie = Cookies.get(COOKIE_KEY);
     return userCookie ? JSON.parse(userCookie) : null;
   } catch {
-    // If cookie parsing fails, remove corrupted cookie and return null
     Cookies.remove(COOKIE_KEY);
     return null;
   }
 };
 
-export const useAuth = create<AuthState>((set) => ({
+// Get initial posts state from cookies
+const getInitialPosts = (): Record<string, Post[]> => {
+  try {
+    const postsCookie = Cookies.get(POSTS_COOKIE_KEY);
+    if (!postsCookie) return {};
+    
+    const posts = JSON.parse(postsCookie);
+    // Convert string dates back to Date objects
+    Object.values(posts).forEach((channelPosts: Post[]) => {
+      channelPosts.forEach(post => {
+        post.createdAt = new Date(post.createdAt);
+        post.replies?.forEach(reply => {
+          reply.createdAt = new Date(reply.createdAt);
+        });
+      });
+    });
+    return posts;
+  } catch {
+    Cookies.remove(POSTS_COOKIE_KEY);
+    return {};
+  }
+};
+
+export const useAuth = create<AuthState>((set, get) => ({
   user: getInitialUser(),
+  posts: getInitialPosts(),
   
   login: async (username: string, password: string) => {
     const user: User = { id: "1", username };
@@ -59,5 +101,18 @@ export const useAuth = create<AuthState>((set) => ({
       Cookies.set(COOKIE_KEY, JSON.stringify(updatedUser), { expires: COOKIE_EXPIRES });
       return { user: updatedUser };
     });
-  }
+  },
+
+  savePosts: (channelId: string, posts: Post[]) => {
+    set((state) => {
+      const newPosts = { ...state.posts, [channelId]: posts };
+      Cookies.set(POSTS_COOKIE_KEY, JSON.stringify(newPosts), { expires: COOKIE_EXPIRES });
+      return { posts: newPosts };
+    });
+  },
+
+  getChannelPosts: (channelId: string) => {
+    const state = get();
+    return state.posts[channelId] || [];
+  },
 }));
