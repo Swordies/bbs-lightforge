@@ -37,7 +37,7 @@ export const Reply = ({ reply }: ReplyProps) => {
               {reply.createdAt.toLocaleString()}
             </div>
             <div 
-              className="whitespace-pre-wrap"
+              className="[&_strong]:font-bold [&_em]:italic [&_u]:underline [&_br]:block"
               dangerouslySetInnerHTML={{ __html: formatText(reply.content) }} 
             />
           </div>

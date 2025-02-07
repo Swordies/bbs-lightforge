@@ -78,7 +78,7 @@ export const PostContent = ({
           </div>
         ) : (
           <div 
-            className="mb-4 whitespace-pre-wrap prose prose-invert max-w-none"
+            className="mb-4 [&_strong]:font-bold [&_em]:italic [&_u]:underline [&_br]:block"
             dangerouslySetInnerHTML={{ 
               __html: formatText(post.content) 
             }} 
