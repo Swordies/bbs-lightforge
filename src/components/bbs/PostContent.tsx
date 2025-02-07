@@ -78,7 +78,7 @@ export const PostContent = ({
           </div>
         ) : (
           <div 
-            className="mb-4 whitespace-pre-wrap prose dark:prose-invert"
+            className="mb-4 whitespace-pre-wrap prose prose-invert max-w-none"
             dangerouslySetInnerHTML={{ 
               __html: formatText(post.content) 
             }} 
@@ -108,11 +108,11 @@ export const PostContent = ({
                   <Edit2 className="w-4 h-4 mr-1" /> Edit
                 </Button>
                 <Button
-                  variant={deleteConfirmId === post.id ? "destructive" : "ghost"}
+                  variant="ghost"
                   size="sm"
                   onClick={(e) => handleDeleteClick(post.id, e)}
                   className={`bbs-button hover:bg-[#1A1F2C] hover:text-white ${
-                    deleteConfirmId === post.id ? 'bg-red-500' : ''
+                    deleteConfirmId === post.id ? 'bg-red-500/80 text-white hover:bg-red-600' : ''
                   }`}
                 >
                   <Trash2 className="w-4 h-4 mr-1" /> Delete
