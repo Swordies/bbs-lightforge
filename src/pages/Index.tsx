@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { PostContainer } from "@/components/bbs/PostContainer";
 import { PostForm } from "@/components/bbs/PostForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface Post {
   id: string;
@@ -87,15 +88,107 @@ const Index = () => {
   const { data: posts = [], isLoading, error } = useQuery({
     queryKey: ['posts'],
     queryFn: fetchPosts,
-    onError: (error) => {
-      console.error('Query error:', error);
+    meta: {
+      onError: (error: Error) => {
+        console.error('Query error:', error);
+        toast({
+          title: "Error loading posts",
+          description: error.message || "Failed to load posts",
+          variant: "destructive",
+        });
+      }
+    }
+  });
+
+  // Add handler functions
+  const handleEdit = async (id: string) => {
+    const post = posts.find(p => p.id === id);
+    if (post) {
+      setEditingPost(id);
+      setEditContent(post.content);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
       toast({
-        title: "Error loading posts",
-        description: error instanceof Error ? error.message : "Failed to load posts",
+        title: "Post deleted",
+        description: "Your post has been deleted successfully.",
+      });
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      toast({
+        title: "Error deleting post",
+        description: error instanceof Error ? error.message : "Failed to delete post",
         variant: "destructive",
       });
     }
-  });
+  };
+
+  const handleSaveEdit = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .update({ content: editContent })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setEditingPost(null);
+      setEditContent("");
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      toast({
+        title: "Post updated",
+        description: "Your post has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating post:', error);
+      toast({
+        title: "Error updating post",
+        description: error instanceof Error ? error.message : "Failed to update post",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleReply = async (postId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('replies')
+        .insert({
+          content: replyContent,
+          post_id: postId,
+          author_id: user.id
+        });
+
+      if (error) throw error;
+
+      setReplyingTo(null);
+      setReplyContent("");
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      toast({
+        title: "Reply added",
+        description: "Your reply has been posted successfully.",
+      });
+    } catch (error) {
+      console.error('Error creating reply:', error);
+      toast({
+        title: "Error posting reply",
+        description: error instanceof Error ? error.message : "Failed to post reply",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (error) {
     return (
