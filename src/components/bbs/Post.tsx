@@ -11,7 +11,7 @@ interface PostProps {
     authorIcon?: string;
     createdAt: Date;
   };
-  user: { username: string } | null;
+  user: { username: string; usernameBoxColor?: string } | null;
   editingPost: string | null;
   editContent: string;
   replyingTo: string | null;
@@ -51,10 +51,17 @@ export const Post = ({
     }
   };
 
+  // Get the username box color if the post author matches the current user
+  const usernameBoxColor = user?.username === post.author ? user?.usernameBoxColor : undefined;
+
   return (
     <div className="bbs-card fade-in">
       <div className="flex items-start gap-4">
-        <PostAuthor author={post.author} authorIcon={post.authorIcon} />
+        <PostAuthor 
+          author={post.author} 
+          authorIcon={post.authorIcon}
+          usernameBoxColor={usernameBoxColor}
+        />
         <PostContent
           post={post}
           user={user}
@@ -76,4 +83,3 @@ export const Post = ({
     </div>
   );
 };
-
