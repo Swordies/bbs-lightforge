@@ -3,65 +3,166 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { PostContainer } from "@/components/bbs/PostContainer";
 import { PostForm } from "@/components/bbs/PostForm";
-
-interface Post {
-  id: string;
-  content: string;
-  author: string;
-  authorIcon?: string;
-  createdAt: Date;
-  replies?: Post[];
-}
-
-const generateRandomId = () => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 15; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-};
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { PostWithReplies } from "@/types/bbs";
+import { toast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const { user } = useAuth();
-  const [posts, setPosts] = useState<Post[]>([
-    {
-      id: "xK9nM2pQ5vR8sT3",
-      content: "Welcome to **ASCII BBS**!\n\nThis is a _minimalist_ bulletin board system where you can:\n- Share your thoughts\n- Connect with others\n- Use __text formatting__\n\nFeel free to register and join the conversation!",
-      author: "Admin",
-      authorIcon: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=100&h=100&fit=crop",
-      createdAt: new Date("2024-01-01T12:00:00"),
-      replies: [
-        {
-          id: "hJ4wL7yB9cN6mD1",
-          content: "Thanks for creating this space! The **retro aesthetic** brings back _memories_ of the __early internet__ days.",
-          author: "RetroFan",
-          authorIcon: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=100&h=100&fit=crop",
-          createdAt: new Date("2024-01-01T12:30:00"),
-        },
-      ],
-    },
-  ]);
+  const queryClient = useQueryClient();
   const [newPost, setNewPost] = useState("");
   const [editingPost, setEditingPost] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
 
+  // Fetch posts with authors and replies
+  const { data: posts = [], isLoading } = useQuery({
+    queryKey: ['posts'],
+    queryFn: async () => {
+      const { data: posts, error } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          author:profiles(*),
+          replies(
+            *,
+            author:profiles(*)
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return posts as PostWithReplies[];
+    }
+  });
+
+  // Create post mutation
+  const createPost = useMutation({
+    mutationFn: async (content: string) => {
+      if (!user) throw new Error("Must be logged in to post");
+      
+      const { error } = await supabase
+        .from('posts')
+        .insert({
+          content,
+          author_id: user.id
+        });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      setNewPost("");
+      toast({
+        title: "Success",
+        description: "Post created successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Edit post mutation
+  const editPost = useMutation({
+    mutationFn: async ({ id, content }: { id: string; content: string }) => {
+      if (!user) throw new Error("Must be logged in to edit");
+      
+      const { error } = await supabase
+        .from('posts')
+        .update({ content, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      setEditingPost(null);
+      setEditContent("");
+      toast({
+        title: "Success",
+        description: "Post updated successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Delete post mutation
+  const deletePost = useMutation({
+    mutationFn: async (id: string) => {
+      if (!user) throw new Error("Must be logged in to delete");
+      
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      toast({
+        title: "Success",
+        description: "Post deleted successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Create reply mutation
+  const createReply = useMutation({
+    mutationFn: async ({ postId, content }: { postId: string; content: string }) => {
+      if (!user) throw new Error("Must be logged in to reply");
+      
+      const { error } = await supabase
+        .from('replies')
+        .insert({
+          content,
+          post_id: postId,
+          author_id: user.id
+        });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      setReplyingTo(null);
+      setReplyContent("");
+      toast({
+        title: "Success",
+        description: "Reply posted successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
   const handlePost = () => {
     if (!user || !newPost.trim()) return;
-
-    const post: Post = {
-      id: generateRandomId(),
-      content: newPost,
-      author: user.username,
-      authorIcon: user.iconUrl,
-      createdAt: new Date(),
-      replies: [],
-    };
-
-    setPosts([post, ...posts]);
-    setNewPost("");
+    createPost.mutate(newPost);
   };
 
   const handleEdit = (postId: string) => {
@@ -73,40 +174,21 @@ const Index = () => {
   };
 
   const handleSaveEdit = (postId: string) => {
-    setPosts(
-      posts.map((post) =>
-        post.id === postId ? { ...post, content: editContent } : post
-      )
-    );
-    setEditingPost(null);
-    setEditContent("");
+    editPost.mutate({ id: postId, content: editContent });
   };
 
   const handleDelete = (postId: string) => {
-    setPosts(posts.filter((post) => post.id !== postId));
+    deletePost.mutate(postId);
   };
 
   const handleReply = (postId: string) => {
     if (!user || !replyContent.trim()) return;
-
-    const reply: Post = {
-      id: generateRandomId(),
-      content: replyContent,
-      author: user.username,
-      authorIcon: user.iconUrl,
-      createdAt: new Date(),
-    };
-
-    setPosts(
-      posts.map((post) =>
-        post.id === postId
-          ? { ...post, replies: [...(post.replies || []), reply] }
-          : post
-      )
-    );
-    setReplyingTo(null);
-    setReplyContent("");
+    createReply.mutate({ postId, content: replyContent });
   };
+
+  if (isLoading) {
+    return <div className="text-center">Loading posts...</div>;
+  }
 
   return (
     <div className="space-y-4 max-w-5xl mx-auto px-2">
@@ -143,4 +225,3 @@ const Index = () => {
 };
 
 export default Index;
-
