@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { formatText } from "@/lib/formatText";
@@ -71,7 +72,7 @@ export const PostContent = ({
           />
         ) : (
           <div 
-            className="mb-4 [&_strong]:font-bold [&_em]:italic [&_u]:underline [&_s]:line-through [&_br]:block"
+            className="mb-4 [&_strong]:font-bold [&_em]:italic [&_u]:underline [&_s]:line-through [&_br]:block [&_u]:border-b [&_u]:border-current"
             dangerouslySetInnerHTML={{ 
               __html: formatText(post.content) 
             }} 
