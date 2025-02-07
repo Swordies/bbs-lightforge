@@ -1,11 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { MessageSquare, Edit2, Trash2, Reply as ReplyIcon, Link } from "lucide-react";
-import { Reply } from "./Reply";
-import { ReplyForm } from "./ReplyForm";
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { formatText } from "@/lib/formatText";
+import { PostAuthor } from "./PostAuthor";
+import { PostContent } from "./PostContent";
+import { Reply } from "./Reply";
 
 interface PostProps {
   post: {
@@ -83,107 +81,24 @@ export const Post = ({
     <div className="space-y-2">
       <div className="bbs-card fade-in">
         <div className="flex items-start gap-4">
-          <div className="flex-shrink-0">
-            {post.authorIcon ? (
-              <img
-                src={post.authorIcon}
-                alt={post.author}
-                className="w-[100px] h-[100px] rounded-none border border-primary/50 object-cover"
-              />
-            ) : (
-              <MessageSquare className="w-[100px] h-[100px]" />
-            )}
-            <div className="text-sm mt-2 text-center font-bold px-2 py-1 border border-primary/50">
-              {post.author}
-            </div>
-          </div>
-          
-          <div className="flex-1">
-            <div className="speech-bubble">
-              <div className="flex justify-between items-center mb-4">
-                <div className="text-sm text-muted-foreground border border-primary/20 px-2 inline-block">
-                  {post.createdAt.toLocaleString()}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handlePermalink(post.id)}
-                  className="bbs-button hover:bg-[#1A1F2C] hover:text-white"
-                >
-                  <Link className="w-4 h-4" />
-                </Button>
-              </div>
-
-              {editingPost === post.id ? (
-                <div className="space-y-2">
-                  <Textarea
-                    value={editContent}
-                    onChange={(e) => setEditContent(e.target.value)}
-                    className="bbs-input w-full min-h-[100px]"
-                  />
-                  <Button
-                    onClick={() => handleSaveEdit(post.id)}
-                    className="bbs-button hover:bg-[#1A1F2C] hover:text-white"
-                  >
-                    Save
-                  </Button>
-                </div>
-              ) : (
-                <div 
-                  className="mb-4 whitespace-pre-wrap prose dark:prose-invert"
-                  dangerouslySetInnerHTML={{ 
-                    __html: formatText(post.content) 
-                  }} 
-                />
-              )}
-
-              {!editingPost && (
-                <div className="flex items-center gap-2 mt-4">
-                  {user && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setReplyingTo(post.id)}
-                      className="bbs-button hover:bg-[#1A1F2C] hover:text-white"
-                    >
-                      <ReplyIcon className="w-4 h-4 mr-1" /> Reply
-                    </Button>
-                  )}
-                  {user && user.username === post.author && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(post.id)}
-                        className="bbs-button hover:bg-[#1A1F2C] hover:text-white"
-                      >
-                        <Edit2 className="w-4 h-4 mr-1" /> Edit
-                      </Button>
-                      <Button
-                        variant={deleteConfirmId === post.id ? "destructive" : "ghost"}
-                        size="sm"
-                        onClick={(e) => handleDeleteClick(post.id, e)}
-                        className={`bbs-button hover:bg-[#1A1F2C] hover:text-white ${
-                          deleteConfirmId === post.id ? 'bg-red-500' : ''
-                        }`}
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" /> Delete
-                      </Button>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {replyingTo === post.id && !editingPost && (
-              <ReplyForm
-                replyContent={replyContent}
-                setReplyContent={setReplyContent}
-                handleReply={() => handleReply(post.id)}
-                onCancel={() => setReplyingTo(null)}
-              />
-            )}
-          </div>
+          <PostAuthor author={post.author} authorIcon={post.authorIcon} />
+          <PostContent
+            post={post}
+            user={user}
+            editingPost={editingPost}
+            editContent={editContent}
+            replyingTo={replyingTo}
+            replyContent={replyContent}
+            deleteConfirmId={deleteConfirmId}
+            setEditContent={setEditContent}
+            setReplyContent={setReplyContent}
+            setReplyingTo={setReplyingTo}
+            handleEdit={handleEdit}
+            handleDeleteClick={handleDeleteClick}
+            handleSaveEdit={handleSaveEdit}
+            handleReply={handleReply}
+            handlePermalink={handlePermalink}
+          />
         </div>
       </div>
 
