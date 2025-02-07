@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare, Edit2, Trash2, Reply as ReplyIcon, Link } from "lucide-react";
@@ -6,6 +5,7 @@ import { Reply } from "./Reply";
 import { ReplyForm } from "./ReplyForm";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { formatText } from "@/lib/formatText";
 
 interface PostProps {
   post: {
@@ -129,9 +129,10 @@ export const Post = ({
                   </Button>
                 </div>
               ) : (
-                <div className="mb-4">
-                  {post.content}
-                </div>
+                <div 
+                  className="mb-4"
+                  dangerouslySetInnerHTML={{ __html: formatText(post.content) }}
+                />
               )}
 
               {!editingPost && (
