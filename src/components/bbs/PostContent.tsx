@@ -5,6 +5,7 @@ import { formatText } from "@/lib/formatText";
 import { Edit2, Trash2, Reply as ReplyIcon, Link } from "lucide-react";
 import { ReplyForm } from "./ReplyForm";
 import { PostForm } from "./PostForm";
+import { useToast } from "@/components/ui/use-toast";
 
 interface PostContentProps {
   post: {
@@ -47,6 +48,29 @@ export const PostContent = ({
   handleReply,
   handlePermalink,
 }: PostContentProps) => {
+  const { toast } = useToast();
+
+  const handlePermalinkClick = (id: string) => {
+    // Get the current URL and add the post ID as a hash
+    const url = `${window.location.origin}${window.location.pathname}#${id}`;
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(url).then(() => {
+      toast({
+        description: "Link copied to clipboard!",
+        duration: 2000,
+      });
+    }).catch(() => {
+      toast({
+        variant: "destructive",
+        description: "Failed to copy link",
+        duration: 2000,
+      });
+    });
+
+    handlePermalink(id);
+  };
+
   return (
     <div className="flex-1">
       <div className="speech-bubble">
@@ -64,7 +88,7 @@ export const PostContent = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => handlePermalink(post.id)}
+            onClick={() => handlePermalinkClick(post.id)}
             className="bbs-button hover:bg-[#1A1F2C] hover:text-white"
           >
             <Link className="w-4 h-4" />
@@ -136,3 +160,4 @@ export const PostContent = ({
     </div>
   );
 };
+

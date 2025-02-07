@@ -49,7 +49,7 @@ export const Post = ({
   const usernameBoxColor = user?.username === post.author ? user?.usernameBoxColor : undefined;
 
   return (
-    <div className="bbs-card fade-in">
+    <div id={post.id} className="bbs-card fade-in">
       <div className="flex items-start gap-4">
         <PostAuthor 
           author={post.author} 
