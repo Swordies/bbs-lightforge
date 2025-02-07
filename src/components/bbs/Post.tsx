@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare, Edit2, Trash2, Reply as ReplyIcon, Link } from "lucide-react";
@@ -66,6 +65,10 @@ export const Post = ({
     return () => document.removeEventListener("click", handleClickOutside);
   }, [deleteConfirmId]);
 
+  const handlePermalink = (postId: string) => {
+    navigate(`/thread/${postId}`);
+  };
+
   const handleDeleteClick = (postId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (deleteConfirmId === postId) {
@@ -74,10 +77,6 @@ export const Post = ({
     } else {
       setDeleteConfirmId(postId);
     }
-  };
-
-  const handlePermalink = (postId: string) => {
-    navigate(`/thread/${postId}`);
   };
 
   return (
@@ -131,7 +130,7 @@ export const Post = ({
                 </div>
               ) : (
                 <div 
-                  className="mb-4 whitespace-pre-wrap"
+                  className="mb-4 whitespace-pre-wrap prose dark:prose-invert"
                   dangerouslySetInnerHTML={{ 
                     __html: formatText(post.content) 
                   }} 
@@ -165,10 +164,10 @@ export const Post = ({
                         size="sm"
                         onClick={(e) => handleDeleteClick(post.id, e)}
                         className={`bbs-button hover:bg-[#1A1F2C] hover:text-white ${
-                          deleteConfirmId === post.id ? 'bg-red-500 text-white' : ''
+                          deleteConfirmId === post.id ? 'bg-red-500' : ''
                         }`}
                       >
-                        <Trash2 className="w-4 h-4 mr-1" /> {deleteConfirmId === post.id ? 'Confirm Delete' : 'Delete'}
+                        <Trash2 className="w-4 h-4 mr-1" /> Delete
                       </Button>
                     </>
                   )}
