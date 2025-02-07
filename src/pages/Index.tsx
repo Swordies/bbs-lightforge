@@ -100,7 +100,7 @@ const Index = () => {
         </div>
       </div>
 
-      <div className="bbs-card fade-in mt-2">
+      <div className="ml-24 bbs-card fade-in mt-2">
         <div className="flex items-start gap-4 flex-row-reverse">
           <div className="flex-shrink-0">
             <img
