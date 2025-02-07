@@ -1,10 +1,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageSquare, Edit2, Trash2, Reply as ReplyIcon } from "lucide-react";
+import { MessageSquare, Edit2, Trash2, Reply as ReplyIcon, Link } from "lucide-react";
 import { Reply } from "./Reply";
 import { ReplyForm } from "./ReplyForm";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface PostProps {
   post: {
@@ -51,6 +52,7 @@ export const Post = ({
   handleReply,
 }: PostProps) => {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = () => {
@@ -71,6 +73,10 @@ export const Post = ({
     } else {
       setDeleteConfirmId(postId);
     }
+  };
+
+  const handlePermalink = (postId: string) => {
+    navigate(`/thread/${postId}`);
   };
 
   return (
@@ -94,8 +100,18 @@ export const Post = ({
           
           <div className="flex-1">
             <div className="speech-bubble">
-              <div className="text-sm text-muted-foreground border border-primary/20 px-2 mb-4 inline-block">
-                {post.createdAt.toLocaleString()}
+              <div className="flex justify-between items-center mb-4">
+                <div className="text-sm text-muted-foreground border border-primary/20 px-2 inline-block">
+                  {post.createdAt.toLocaleString()}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handlePermalink(post.id)}
+                  className="bbs-button hover:bg-[#1A1F2C] hover:text-white"
+                >
+                  <Link className="w-4 h-4" />
+                </Button>
               </div>
 
               {editingPost === post.id ? (
@@ -107,7 +123,7 @@ export const Post = ({
                   />
                   <Button
                     onClick={() => handleSaveEdit(post.id)}
-                    className="bbs-button"
+                    className="bbs-button hover:bg-[#1A1F2C] hover:text-white"
                   >
                     Save
                   </Button>
@@ -125,7 +141,7 @@ export const Post = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => setReplyingTo(post.id)}
-                      className="bbs-button"
+                      className="bbs-button hover:bg-[#1A1F2C] hover:text-white"
                     >
                       <ReplyIcon className="w-4 h-4 mr-1" /> Reply
                     </Button>
@@ -136,7 +152,7 @@ export const Post = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEdit(post.id)}
-                        className="bbs-button"
+                        className="bbs-button hover:bg-[#1A1F2C] hover:text-white"
                       >
                         <Edit2 className="w-4 h-4 mr-1" /> Edit
                       </Button>
@@ -144,7 +160,7 @@ export const Post = ({
                         variant={deleteConfirmId === post.id ? "destructive" : "ghost"}
                         size="sm"
                         onClick={(e) => handleDeleteClick(post.id, e)}
-                        className="bbs-button"
+                        className="bbs-button hover:bg-[#1A1F2C] hover:text-white"
                       >
                         <Trash2 className="w-4 h-4 mr-1" /> Delete
                       </Button>
