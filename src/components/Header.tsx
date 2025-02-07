@@ -39,7 +39,7 @@ export const Header = () => {
         <div className="flex items-center justify-between">
           <Link to="/" className="text-xl font-bold hover:opacity-80 transition-opacity flex items-center gap-2">
             <span className="text-2xl">
-              +-[ ASCII BBS ]-+
+              +-[ Lightforge BBS ]-+
             </span>
           </Link>
           <div className="flex items-center gap-4">
